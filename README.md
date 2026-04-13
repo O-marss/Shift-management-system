@@ -1,6 +1,6 @@
-# 📊 Kayan Store – Remote Attendance & Shift Management System
+# 📊 Remote Attendance & Shift Management System
 
-A lightweight, real-time attendance and shift management system designed specifically for **Kayan Store's sales team**.  
+A lightweight, real-time attendance and shift management system designed specifically for **Your Store's sales team**.  
 The system streamlines daily operations by tracking attendance, managing shift handovers, and organizing tasks — all in one place.
 
 ---
