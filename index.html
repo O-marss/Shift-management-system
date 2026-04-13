@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Company — بوابة الموظف</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --surface: #141414;
+        --surface2: #1e1e1e;
+        --border: rgba(255, 255, 255, 0.07);
+        --border2: rgba(255, 255, 255, 0.12);
+        --text: #f5f2ee;
+        --muted: #777;
+        --red: #e53935;
+        --red-light: #ef5350;
+        --red-bg: rgba(229, 57, 53, 0.1);
+        --red-border: rgba(229, 57, 53, 0.3);
+        --green: #4caf50;
+        --green-bg: rgba(76, 175, 80, 0.1);
+        --green-border: rgba(76, 175, 80, 0.3);
+        --amber: #ff9800;
+        --amber-bg: rgba(255, 152, 0, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "IBM Plex Sans Arabic", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* ─── LOGIN ─── */
+      #login-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 1.5rem;
+      }
+      .login-wrap {
+        width: 100%;
+        max-width: 360px;
+      }
+
+      .brand {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .brand-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--red);
+        margin-bottom: 12px;
+      }
+      .brand-logo svg {
+        width: 28px;
+        height: 28px;
+      }
+      .brand h1 {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+      }
+      .brand p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      .login-card {
+        background: var(--surface);
+        border: 0.5px solid var(--border2);
+        border-radius: 20px;
+        padding: 1.75rem;
+      }
+      .login-card h2 {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--muted);
+        margin-bottom: 1.25rem;
+      }
+
+      .field {
+        margin-bottom: 0.875rem;
+      }
+      .field label {
+        font-size: 12px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 5px;
+      }
+      .field input {
+        width: 100%;
+        background: var(--surface2);
+        border: 0.5px solid var(--border2);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 15px;
+        color: var(--text);
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+        direction: ltr;
+        text-align: center;
+        letter-spacing: 2px;
+      }
+      .field input:focus {
+        border-color: var(--red);
+      }
+
+      .btn-login {
+        width: 100%;
+        background: var(--red);
+        border: none;
+        border-radius: 12px;
+        padding: 13px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 0.25rem;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+      }
+      .btn-login:hover {
+        background: var(--red-light);
+      }
+      .btn-login:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .login-err {
+        background: var(--red-bg);
+        border: 0.5px solid var(--red-border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--red-light);
+        margin-top: 12px;
+        display: none;
+        text-align: center;
+      }
+      .shake {
+        animation: shake 0.4s ease;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-8px);
+        }
+        75% {
+          transform: translateX(8px);
+        }
+      }
+      .spin-sm {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: sp 0.6s linear infinite;
+      }
+      @keyframes sp {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ─── DASHBOARD ─── */
+      #dashboard {
+        display: none;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        background: var(--surface);
+        border-bottom: 0.5px solid var(--border2);
+        padding: 0.875rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .topbar-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-logo svg {
+        width: 16px;
+        height: 16px;
+      }
+      .topbar-name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .seller-pill {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--surface2);
+        border: 0.5px solid var(--border2);
+        border-radius: 20px;
+        padding: 5px 10px;
+      }
+      .seller-pill .av {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .seller-pill .info {
+        line-height: 1.2;
+      }
+      .seller-pill .sname {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .seller-pill .scode {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .btn-out {
+        background: transparent;
+        border: 0.5px solid var(--border2);
+        border-radius: 8px;
+        padding: 5px 11px;
+        font-size: 12px;
+        color: var(--muted);
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-out:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      .content {
+        padding: 1.25rem;
+        max-width: 500px;
+        margin: 0 auto;
+        padding-bottom: 3rem;
+      }
+
+      /* Clock */
+      .clock-card {
+        background: var(--surface);
+        border: 0.5px solid var(--border2);
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        text-align: center;
+        margin-bottom: 0.875rem;
+      }
+      .clock {
+        font-size: 36px;
+        font-weight: 300;
+        letter-spacing: 3px;
+        font-variant-numeric: tabular-nums;
+      }
+      .datestr {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      /* Section cards */
+      .sec {
+        background: var(--surface);
+        border: 0.5px solid var(--border2);
+        border-radius: 14px;
+        padding: 1.125rem;
+        margin-bottom: 0.875rem;
+      }
+      .sec-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .sec-title::before {
+        content: "";
+        width: 3px;
+        height: 14px;
+        background: var(--red);
+        border-radius: 2px;
+        display: inline-block;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.18s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn-red {
+        background: var(--red);
+        color: #fff;
+      }
+      .btn-red:hover {
+        background: var(--red-light);
+      }
+      .btn-ghost {
+        background: var(--surface2);
+        color: var(--text);
+        border-color: var(--border2);
+      }
+      .btn-ghost:hover {
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .btn-ghost-red {
+        background: var(--surface2);
+        color: var(--red-light);
+        border-color: var(--border2);
+      }
+      .btn-ghost-red:hover {
+        border-color: var(--red);
+      }
+      .btn-full {
+        width: 100%;
+      }
+      .btn-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 0.875rem;
+      }
+      .span2 {
+        grid-column: span 2;
+      }
+
+      .spin-btn {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: sp 0.6s linear infinite;
+        display: none;
+      }
+      .loading .spin-btn {
+        display: inline-block;
+      }
+      .loading .btn-text {
+        display: none;
+      }
+
+      .collapsible {
+        display: none;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 0.5px solid var(--border);
+      }
+      .collapsible.open {
+        display: block;
+      }
+      .inp-field {
+        margin-bottom: 0.75rem;
+      }
+      .inp-field label {
+        font-size: 12px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+      }
+      .inp-field textarea {
+        width: 100%;
+        background: var(--surface2);
+        border: 0.5px solid var(--border2);
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 14px;
+        color: var(--text);
+        font-family: inherit;
+        outline: none;
+        resize: vertical;
+        min-height: 60px;
+        transition: border-color 0.2s;
+        direction: rtl;
+      }
+      .inp-field textarea:focus {
+        border-color: var(--red);
+      }
+
+      /* Handover buttons */
+      .hbtns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 0.5rem;
+      }
+      .hbtn {
+        padding: 14px 8px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        border: 1px solid var(--border2);
+        background: var(--surface2);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.18s;
+      }
+      .hbtn:active {
+        transform: scale(0.97);
+      }
+      .hbtn-icon {
+        font-size: 20px;
+      }
+      .hbtn.ok:hover,
+      .hbtn.ok.sel {
+        background: var(--green-bg);
+        border-color: var(--green-border);
+        color: var(--green);
+      }
+      .hbtn.nok:hover,
+      .hbtn.nok.sel {
+        background: var(--red-bg);
+        border-color: var(--red-border);
+        color: var(--red-light);
+      }
+
+      /* Tasks */
+      .tasks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .task-item {
+        background: var(--surface2);
+        border: 0.5px solid var(--border2);
+        border-radius: 11px;
+        padding: 12px 14px;
+        transition: border-color 0.2s;
+      }
+      .task-item.done {
+        border-color: var(--green-border);
+        background: rgba(76, 175, 80, 0.04);
+      }
+      .task-item.flagged {
+        border-color: var(--red-border);
+      }
+      .task-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .task-text {
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
+        flex: 1;
+      }
+      .task-item.done .task-text {
+        text-decoration: line-through;
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .badge-g {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .badge-p {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .badge-r {
+        background: var(--red-bg);
+        color: var(--red-light);
+      }
+      .task-btns {
+        display: flex;
+        gap: 6px;
+      }
+      .tbtn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        border: 0.5px solid;
+        transition: all 0.18s;
+      }
+      .tbtn-done {
+        border-color: var(--green-border);
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .tbtn-done:hover {
+        background: rgba(76, 175, 80, 0.2);
+      }
+      .tbtn-no {
+        border-color: var(--border2);
+        background: transparent;
+        color: var(--muted);
+      }
+      .tbtn-no:hover {
+        border-color: var(--red-border);
+        color: var(--red-light);
+      }
+      .task-note-form {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 0.5px solid var(--border);
+        display: none;
+      }
+      .task-note-form.open {
+        display: block;
+      }
+      .task-note-form textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 0.5px solid var(--border2);
+        border-radius: 8px;
+        padding: 8px 11px;
+        font-size: 13px;
+        color: var(--text);
+        font-family: inherit;
+        outline: none;
+        resize: vertical;
+        min-height: 55px;
+        direction: rtl;
+        transition: border-color 0.2s;
+      }
+      .task-note-form textarea:focus {
+        border-color: var(--red);
+      }
+      .task-note-form button {
+        margin-top: 6px;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        background: var(--red-bg);
+        border: 0.5px solid var(--red-border);
+        color: var(--red-light);
+        transition: all 0.18s;
+      }
+      .task-note-form button:hover {
+        background: rgba(229, 57, 53, 0.2);
+      }
+      .saved-note {
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--bg);
+        border-radius: 7px;
+        padding: 6px 10px;
+        margin-top: 6px;
+        border-right: 2px solid var(--red);
+      }
+      .saved-note span {
+        color: var(--red-light);
+        font-weight: 500;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 1.25rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--surface);
+        border: 0.5px solid var(--border2);
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 13px;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 200;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast.ok {
+        border-color: var(--green-border);
+        color: var(--green);
+      }
+      .toast.err {
+        border-color: var(--red-border);
+        color: var(--red-light);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ LOGIN ═══ -->
+    <div id="login-screen">
+      <div class="login-wrap">
+        <div class="brand">
+          <div class="brand-logo">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </div>
+          <h1>Your Company</h1>
+          <p>بوابة الموظف</p>
+        </div>
+        <div class="login-card" id="login-card">
+          <h2>اكتب الكود الخاص بك</h2>
+          <div class="field">
+            <label>الكود الوظيفي</label>
+            <input
+              type="text"
+              id="l-code"
+              placeholder="مثال: S-01"
+              autocomplete="off"
+              oninput="this.value = this.value.toUpperCase()"
+              onkeydown="
+                if (event.key === 'Enter')
+                  document.getElementById('l-pass').focus();
+              "
+            />
+          </div>
+          <div class="field">
+            <label>كلمة المرور</label>
+            <input
+              type="password"
+              id="l-pass"
+              placeholder="••••••••"
+              onkeydown="if (event.key === 'Enter') doLogin();"
+            />
+          </div>
+          <button class="btn-login" id="btn-login" onclick="doLogin()">
+            <span id="login-label">دخول</span>
+          </button>
+          <div class="login-err" id="login-err">الكود أو كلمة المرور غلط</div>
+        </div>
+        <div style="text-align: center; margin-top: 1.25rem">
+          <a
+            href="admin.html"
+            style="
+              font-size: 12px;
+              color: var(--muted);
+              text-decoration: none;
+              border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
+              padding-bottom: 2px;
+              transition: color 0.2s;
+            "
+            onmouseover="this.style.color = 'var(--red-light)'"
+            onmouseout="this.style.color = 'var(--muted)'"
+            >لوحة المدير ←</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="dashboard">
+      <div class="topbar">
+        <div class="topbar-brand">
+          <div class="topbar-logo">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2.5"
+              stroke-linecap="round"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+            </svg>
+          </div>
+          <span class="topbar-name">Your Company</span>
+        </div>
+        <div class="topbar-right">
+          <div class="seller-pill">
+            <div class="av" id="s-av">K</div>
+            <div class="info">
+              <div class="sname" id="s-name">—</div>
+              <div class="scode" id="s-code">—</div>
+            </div>
+          </div>
+          <button class="btn-out" onclick="doLogout()">خروج</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="clock-card">
+          <div class="clock" id="clock">00:00:00</div>
+          <div class="datestr" id="datestr"></div>
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div class="sec">
+          <div class="sec-title">تسجيل الحضور</div>
+          <div class="btn-grid">
+            <button
+              class="btn btn-red span2"
+              id="btn-in"
+              onclick="record('حضور')"
+            >
+              <span class="btn-text">✓ تسجيل حضور</span>
+              <span class="spin-btn"></span>
+            </button>
+            <button class="btn btn-ghost" onclick="record('انصراف')">
+              انصراف
+            </button>
+            <button
+              class="btn btn-ghost-red"
+              onclick="toggleCollapse('abs-wrap')"
+            >
+              تسجيل غياب
+            </button>
+          </div>
+          <div class="collapsible" id="abs-wrap">
+            <div class="inp-field" style="margin-top: 0.5rem">
+              <label>سبب الغياب</label>
+              <textarea id="abs-note" placeholder="اكتب السبب..."></textarea>
+            </div>
+            <button class="btn btn-ghost-red btn-full" onclick="record('غياب')">
+              تأكيد الغياب
+            </button>
+          </div>
+        </div>
+
+        <!-- SHIFT HANDOVER -->
+        <div class="sec">
+          <div class="sec-title">تسليم الشيفت</div>
+          <label style="font-size: 13px; color: var(--muted)"
+            >استلمت الكومنتات والرسايل من الشيفت اللي فات؟</label
+          >
+          <div class="hbtns">
+            <button class="hbtn ok" id="hbtn-ok" onclick="selectHandover('ok')">
+              <span class="hbtn-icon">✓</span>
+              <span>تمام، استلمت</span>
+            </button>
+            <button
+              class="hbtn nok"
+              id="hbtn-nok"
+              onclick="selectHandover('nok')"
+            >
+              <span class="hbtn-icon">!</span>
+              <span>مش تمام</span>
+            </button>
+          </div>
+          <div class="collapsible" id="ho-problem">
+            <div class="inp-field" style="margin-top: 0.5rem">
+              <label>وضّح المشكلة</label>
+              <textarea
+                id="ho-note"
+                placeholder="إيه اللي مش تمام؟ وضّح بالتفصيل..."
+              ></textarea>
+            </div>
+          </div>
+          <button
+            class="btn btn-red btn-full"
+            style="margin-top: 0.875rem"
+            id="btn-ho"
+            onclick="submitHandover()"
+          >
+            <span class="btn-text">حفظ تسليم الشيفت</span>
+            <span class="spin-btn"></span>
+          </button>
+        </div>
+
+        <!-- TASKS -->
+        <div class="sec">
+          <div class="sec-title">التاسكات بتاعتي</div>
+          <div id="tasks-wrap">
+            <div class="empty">جاري تحميل التاسكات...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // =============================================
+      // ⚙️ ضع بيانات Supabase هنا
+      // =============================================
+      const SUPABASE_URL = "https://moeolrwkmvicpxjhuqmc.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZW9scndrbXZpY3B4amh1cW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NjI0NDIsImV4cCI6MjA4OTIzODQ0Mn0.BmkrnrqxdpsIWvYZMxPVC_SH8rFVZgVCcegOf2c0Uzw";
+      // =============================================
+
+      if ((SUPABASE_URL = "https://moeolrwkmvicpxjhuqmc.supabase.co")) {
+        document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:32px">⚠️</div><div style="font-size:16px;font-weight:500">Supabase مش متربط</div><div style="font-size:13px;color:#777;max-width:300px">افتح الملف وحط الـ SUPABASE_URL و SUPABASE_ANON_KEY</div></div>`;
+      }
+
+      const { createClient } = supabase;
+      const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      let ME = null;
+
+      // Clock
+      const DAYS = [
+        "الأحد",
+        "الاثنين",
+        "الثلاثاء",
+        "الأربعاء",
+        "الخميس",
+        "الجمعة",
+        "السبت",
+      ];
+      const MONTHS = [
+        "يناير",
+        "فبراير",
+        "مارس",
+        "أبريل",
+        "مايو",
+        "يونيو",
+        "يوليو",
+        "أغسطس",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر",
+      ];
+      function pad(n) {
+        return String(n).padStart(2, "0");
+      }
+      function tick() {
+        const n = new Date();
+        document.getElementById("clock").textContent =
+          pad(n.getHours()) +
+          ":" +
+          pad(n.getMinutes()) +
+          ":" +
+          pad(n.getSeconds());
+        document.getElementById("datestr").textContent =
+          DAYS[n.getDay()] +
+          "، " +
+          n.getDate() +
+          " " +
+          MONTHS[n.getMonth()] +
+          " " +
+          n.getFullYear();
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      function toast(msg, type = "ok") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = "toast show " + type;
+        setTimeout(() => el.classList.remove("show"), 3500);
+      }
+      function toggleCollapse(id) {
+        document.getElementById(id).classList.toggle("open");
+      }
+
+      // ─── LOGIN ───
+      async function doLogin() {
+        const code = document
+          .getElementById("l-code")
+          .value.trim()
+          .toUpperCase();
+        const pass = document.getElementById("l-pass").value;
+        if (!code || !pass) {
+          showLoginErr("من فضلك ادخل الكود وكلمة المرور");
+          return;
+        }
+        const btn = document.getElementById("btn-login");
+        btn.disabled = true;
+        document.getElementById("login-label").innerHTML =
+          '<div class="spin-sm"></div>';
+        document.getElementById("login-err").style.display = "none";
+        const { data, error } = await db
+          .from("sellers")
+          .select("*")
+          .eq("code", code)
+          .single();
+        btn.disabled = false;
+        document.getElementById("login-label").textContent = "دخول";
+        if (error || !data || data.password !== pass) {
+          shakeCard();
+          showLoginErr("الكود أو كلمة المرور غلط");
+          return;
+        }
+        ME = data;
+        sessionStorage.setItem("kayan_seller", JSON.stringify(data));
+        enterDashboard(data);
+      }
+      function showLoginErr(msg) {
+        const el = document.getElementById("login-err");
+        el.textContent = msg;
+        el.style.display = "block";
+      }
+      function shakeCard() {
+        const c = document.getElementById("login-card");
+        c.classList.remove("shake");
+        void c.offsetWidth;
+        c.classList.add("shake");
+      }
+
+      function enterDashboard(seller) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        document.getElementById("s-name").textContent = seller.name;
+        document.getElementById("s-code").textContent = seller.code;
+        document.getElementById("s-av").textContent = seller.name
+          .trim()[0]
+          .toUpperCase();
+        loadTasks();
+        db.channel("tasks-" + seller.code)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "tasks",
+              filter: `seller_code=eq.${seller.code}`,
+            },
+            () => loadTasks(),
+          )
+          .subscribe();
+      }
+      function doLogout() {
+        sessionStorage.removeItem("kayan_seller");
+        ME = null;
+        document.getElementById("dashboard").style.display = "none";
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("l-pass").value = "";
+        document.getElementById("login-err").style.display = "none";
+      }
+      // Auto-login
+      try {
+        const s = sessionStorage.getItem("kayan_seller");
+        if (s) {
+          ME = JSON.parse(s);
+          enterDashboard(ME);
+        }
+      } catch (e) {
+        sessionStorage.removeItem("kayan_seller");
+      }
+
+      // ─── ATTENDANCE ───
+      async function record(action) {
+        if (!ME) return;
+        const note = document.getElementById("abs-note").value.trim();
+        const btn = document.getElementById("btn-in");
+        btn.classList.add("loading");
+        btn.disabled = true;
+        const { error } = await db.from("attendance").insert({
+          seller_code: ME.code,
+          employee_name: ME.name,
+          action,
+          note: note || null,
+        });
+        btn.classList.remove("loading");
+        btn.disabled = false;
+        if (error) {
+          toast("حصل خطأ، حاول تاني", "err");
+          return;
+        }
+        const msgs = {
+          حضور: "تم تسجيل حضورك ✓",
+          انصراف: "تم تسجيل انصرافك ✓",
+          غياب: "تم تسجيل غيابك ✓",
+        };
+        toast(msgs[action]);
+        document.getElementById("abs-note").value = "";
+        document.getElementById("abs-wrap").classList.remove("open");
+      }
+
+      // ─── HANDOVER ───
+      let hoStatus = null;
+      function selectHandover(val) {
+        hoStatus = val;
+        document
+          .getElementById("hbtn-ok")
+          .classList.toggle("sel", val === "ok");
+        document
+          .getElementById("hbtn-nok")
+          .classList.toggle("sel", val === "nok");
+        val === "nok"
+          ? document.getElementById("ho-problem").classList.add("open")
+          : document.getElementById("ho-problem").classList.remove("open");
+      }
+      async function submitHandover() {
+        if (!ME) return;
+        if (!hoStatus) {
+          toast("اختار تمام أو مش تمام", "err");
+          return;
+        }
+        const btn = document.getElementById("btn-ho");
+        btn.classList.add("loading");
+        btn.disabled = true;
+        const note = document.getElementById("ho-note").value.trim();
+        const { error } = await db.from("shift_handovers").insert({
+          seller_code: ME.code,
+          employee_name: ME.name,
+          status: hoStatus,
+          note: note || null,
+        });
+        btn.classList.remove("loading");
+        btn.disabled = false;
+        if (error) {
+          toast("حصل خطأ", "err");
+          return;
+        }
+        toast(hoStatus === "ok" ? "تم تسجيل التسليم ✓" : "تم رفع المشكلة ✓");
+        hoStatus = null;
+        document.getElementById("hbtn-ok").classList.remove("sel");
+        document.getElementById("hbtn-nok").classList.remove("sel");
+        document.getElementById("ho-note").value = "";
+        document.getElementById("ho-problem").classList.remove("open");
+      }
+
+      // ─── TASKS ───
+      async function loadTasks() {
+        if (!ME) return;
+        const today = new Date().toISOString().split("T")[0];
+        const { data, error } = await db
+          .from("tasks")
+          .select("*")
+          .eq("seller_code", ME.code)
+          .eq("date", today)
+          .order("recorded_at", { ascending: true });
+        const wrap = document.getElementById("tasks-wrap");
+        if (error) {
+          wrap.innerHTML = '<div class="empty">حصل خطأ في التحميل</div>';
+          return;
+        }
+        if (!data || !data.length) {
+          wrap.innerHTML =
+            '<div class="empty">ما فيش تاسكات محددة ليك النهارده</div>';
+          return;
+        }
+        const done = data.filter((t) => t.status === "done").length;
+        wrap.innerHTML = `
+    <div style="display:flex;gap:7px;margin-bottom:.875rem;">
+      <span class="badge badge-g">خلصت: ${done}</span>
+      <span class="badge badge-p">باقي: ${data.length - done}</span>
+    </div>
+    <div class="tasks-list">
+      ${data.map((t) => taskHTML(t)).join("")}
+    </div>`;
+      }
+
+      function taskHTML(t) {
+        const isDone = t.status === "done";
+        const hasSavedNote = t.note && !isDone;
+        return `
+    <div class="task-item ${isDone ? "done" : ""} ${hasSavedNote ? "flagged" : ""}" id="ti-${t.id}">
+      <div class="task-top">
+        <div class="task-text">${t.task_text}</div>
+        <span class="badge ${isDone ? "badge-g" : "badge-p"}">${isDone ? "✓ خلصت" : "قيد التنفيذ"}</span>
+      </div>
+      ${hasSavedNote ? `<div class="saved-note"><span>ملاحظة:</span> ${t.note}</div>` : ""}
+      ${
+        !isDone
+          ? `
+        <div class="task-btns">
+          <button class="tbtn tbtn-done" onclick="markDone('${t.id}')">✓ خلصت</button>
+          <button class="tbtn tbtn-no" onclick="toggleTaskNote('${t.id}')">لا، مخلصتش</button>
+        </div>
+        <div class="task-note-form" id="tnf-${t.id}">
+          <textarea id="tnt-${t.id}" placeholder="ليه مخلصتش؟ وضّح..."></textarea>
+          <button onclick="saveTaskNote('${t.id}')">حفظ الملاحظة</button>
+        </div>`
+          : ""
+      }
+    </div>`;
+      }
+
+      function toggleTaskNote(id) {
+        document.getElementById("tnf-" + id).classList.toggle("open");
+      }
+
+      async function markDone(id) {
+        const el = document.getElementById("ti-" + id);
+        if (el) {
+          el.style.opacity = ".5";
+          el.style.pointerEvents = "none";
+        }
+        const { error } = await db
+          .from("tasks")
+          .update({ status: "done", completed_at: new Date().toISOString() })
+          .eq("id", id);
+        if (error) {
+          toast("حصل خطأ", "err");
+          if (el) {
+            el.style.opacity = "1";
+            el.style.pointerEvents = "";
+          }
+          return;
+        }
+        toast("تم تسجيل إنهاء التاسك ✓");
+        loadTasks();
+      }
+
+      async function saveTaskNote(id) {
+        const note = document.getElementById("tnt-" + id).value.trim();
+        if (!note) {
+          toast("اكتب الملاحظة الأول", "err");
+          return;
+        }
+        const { error } = await db.from("tasks").update({ note }).eq("id", id);
+        if (error) {
+          toast("حصل خطأ", "err");
+          return;
+        }
+        toast("تم حفظ الملاحظة ✓");
+        loadTasks();
+      }
+    </script>
+  </body>
+</html>
