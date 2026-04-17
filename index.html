@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Company — بوابة الموظف</title>
+    <title>Kayan Store — بوابة الموظف</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,25 +15,34 @@
       onload="this.media = 'all'"
     />
     <style>
+      /* ── Design Tokens ── */
       :root {
         --bg: #0a0a0a;
         --surface: #141414;
         --surface2: #1e1e1e;
-        --border: rgba(255, 255, 255, 0.07);
-        --border2: rgba(255, 255, 255, 0.12);
+        --b: rgba(255, 255, 255, 0.07);
+        --b2: rgba(255, 255, 255, 0.13);
         --text: #f5f2ee;
-        --muted: #777;
+        --muted: #6b6b6b;
         --red: #e53935;
-        --red-light: #ef5350;
+        --red-h: #ef5350;
         --red-bg: rgba(229, 57, 53, 0.1);
-        --red-border: rgba(229, 57, 53, 0.3);
+        --red-br: rgba(229, 57, 53, 0.3);
         --green: #4caf50;
         --green-bg: rgba(76, 175, 80, 0.1);
-        --green-border: rgba(76, 175, 80, 0.3);
+        --green-br: rgba(76, 175, 80, 0.3);
         --amber: #ff9800;
         --amber-bg: rgba(255, 152, 0, 0.1);
+        --amber-br: rgba(255, 152, 0, 0.3);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
       }
-      * {
+
+      /* ── Reset ── */
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
@@ -42,9 +52,35 @@
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
       }
 
-      /* ─── LOGIN ─── */
+      /* ── Config Guard ── */
+      #config-error {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      #config-error .icon {
+        font-size: 40px;
+      }
+      #config-error h2 {
+        font-size: 16px;
+        color: var(--red-h);
+      }
+      #config-error p {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 280px;
+        line-height: 1.6;
+      }
+
+      /* ── Login ── */
       #login-screen {
         display: flex;
         align-items: center;
@@ -61,7 +97,7 @@
         text-align: center;
         margin-bottom: 2rem;
       }
-      .brand-logo {
+      .brand-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -71,36 +107,35 @@
         background: var(--red);
         margin-bottom: 12px;
       }
-      .brand-logo svg {
+      .brand-icon svg {
         width: 28px;
         height: 28px;
       }
       .brand h1 {
         font-size: 20px;
         font-weight: 600;
-        letter-spacing: -0.3px;
       }
       .brand p {
         font-size: 12px;
         color: var(--muted);
-        margin-top: 3px;
+        margin-top: 4px;
       }
 
       .login-card {
         background: var(--surface);
-        border: 0.5px solid var(--border2);
-        border-radius: 20px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-lg);
         padding: 1.75rem;
       }
       .login-card h2 {
         font-size: 14px;
-        font-weight: 500;
         color: var(--muted);
         margin-bottom: 1.25rem;
+        font-weight: 400;
       }
 
       .field {
-        margin-bottom: 0.875rem;
+        margin-bottom: 1rem;
       }
       .field label {
         font-size: 12px;
@@ -111,8 +146,8 @@
       .field input {
         width: 100%;
         background: var(--surface2);
-        border: 0.5px solid var(--border2);
-        border-radius: 10px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-sm);
         padding: 12px 14px;
         font-size: 15px;
         color: var(--text);
@@ -126,44 +161,82 @@
       .field input:focus {
         border-color: var(--red);
       }
+      .field input.error {
+        border-color: var(--red-br);
+      }
 
-      .btn-login {
-        width: 100%;
-        background: var(--red);
-        border: none;
-        border-radius: 12px;
-        padding: 13px;
-        font-size: 15px;
-        font-weight: 600;
-        color: #fff;
-        font-family: inherit;
-        cursor: pointer;
-        margin-top: 0.25rem;
-        transition: background 0.2s;
+      .btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 7px;
+        width: 100%;
+        padding: 13px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
         min-height: 48px;
       }
-      .btn-login:hover {
-        background: var(--red-light);
+      .btn-red {
+        background: var(--red);
+        color: #fff;
       }
-      .btn-login:disabled {
+      .btn-red:hover {
+        background: var(--red-h);
+      }
+      .btn-red:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
+      .btn-ghost {
+        background: var(--surface2);
+        color: var(--text);
+        border: 0.5px solid var(--b2);
+      }
+      .btn-ghost:hover {
+        border-color: var(--amber-br);
+        color: var(--amber);
+      }
+      .btn-ghost-red {
+        background: var(--surface2);
+        color: var(--red-h);
+        border: 0.5px solid var(--b2);
+      }
+      .btn-ghost-red:hover {
+        border-color: var(--red-br);
+      }
+      .btn-green-o {
+        background: var(--green-bg);
+        color: var(--green);
+        border: 0.5px solid var(--green-br);
+      }
+      .btn-green-o:hover {
+        background: rgba(76, 175, 80, 0.18);
+      }
+      .btn-sm {
+        padding: 6px 12px;
+        width: auto;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: var(--radius-sm);
+        min-height: unset;
+      }
 
-      .login-err {
+      .error-msg {
         background: var(--red-bg);
-        border: 0.5px solid var(--red-border);
-        border-radius: 10px;
+        border: 0.5px solid var(--red-br);
+        border-radius: var(--radius-sm);
         padding: 10px 14px;
         font-size: 13px;
-        color: var(--red-light);
-        margin-top: 12px;
+        color: var(--red-h);
+        margin-top: 10px;
         display: none;
         text-align: center;
+        animation: fadeIn 0.2s ease;
       }
       .shake {
         animation: shake 0.4s ease;
@@ -180,21 +253,32 @@
           transform: translateX(8px);
         }
       }
-      .spin-sm {
-        width: 18px;
-        height: 18px;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: sp 0.6s linear infinite;
-      }
-      @keyframes sp {
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
         to {
-          transform: rotate(360deg);
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
-      /* ─── DASHBOARD ─── */
+      .login-footer {
+        text-align: center;
+        margin-top: 1.25rem;
+      }
+      .login-footer a {
+        font-size: 12px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .login-footer a:hover {
+        color: var(--red-h);
+      }
+
+      /* ── Dashboard ── */
       #dashboard {
         display: none;
         min-height: 100vh;
@@ -202,34 +286,35 @@
 
       .topbar {
         background: var(--surface);
-        border-bottom: 0.5px solid var(--border2);
+        border-bottom: 0.5px solid var(--b2);
         padding: 0.875rem 1.25rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
         position: sticky;
         top: 0;
-        z-index: 10;
+        z-index: 50;
       }
-      .topbar-brand {
+      .topbar-left {
         display: flex;
         align-items: center;
         gap: 10px;
       }
       .topbar-logo {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         border-radius: 8px;
         background: var(--red);
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
       }
       .topbar-logo svg {
-        width: 16px;
-        height: 16px;
+        width: 15px;
+        height: 15px;
       }
-      .topbar-name {
+      .topbar-brand {
         font-size: 14px;
         font-weight: 600;
       }
@@ -238,286 +323,283 @@
         align-items: center;
         gap: 10px;
       }
-      .seller-pill {
+
+      .seller-chip {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
         background: var(--surface2);
-        border: 0.5px solid var(--border2);
+        border: 0.5px solid var(--b2);
         border-radius: 20px;
-        padding: 5px 10px;
+        padding: 5px 12px 5px 7px;
       }
-      .seller-pill .av {
-        width: 22px;
-        height: 22px;
+      .seller-avatar {
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background: var(--red);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         color: #fff;
+        flex-shrink: 0;
       }
-      .seller-pill .info {
-        line-height: 1.2;
-      }
-      .seller-pill .sname {
+      .seller-name {
         font-size: 12px;
         font-weight: 500;
       }
-      .seller-pill .scode {
-        font-size: 10px;
+      .seller-code {
+        font-size: 11px;
         color: var(--muted);
       }
-      .btn-out {
+
+      .logout-btn {
         background: transparent;
-        border: 0.5px solid var(--border2);
-        border-radius: 8px;
-        padding: 5px 11px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-sm);
+        padding: 6px 11px;
         font-size: 12px;
         color: var(--muted);
         font-family: inherit;
         cursor: pointer;
         transition: all 0.2s;
       }
-      .btn-out:hover {
-        border-color: var(--red);
-        color: var(--red);
+      .logout-btn:hover {
+        border-color: var(--red-br);
+        color: var(--red-h);
       }
 
       .content {
         padding: 1.25rem;
         max-width: 500px;
         margin: 0 auto;
-        padding-bottom: 3rem;
+        padding-bottom: 4rem;
       }
 
-      /* Clock */
+      /* ── Clock ── */
       .clock-card {
         background: var(--surface);
-        border: 0.5px solid var(--border2);
-        border-radius: 14px;
-        padding: 1rem 1.25rem;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
         text-align: center;
-        margin-bottom: 0.875rem;
+        margin-bottom: 1rem;
       }
-      .clock {
+      .clock-display {
         font-size: 36px;
         font-weight: 300;
         letter-spacing: 3px;
         font-variant-numeric: tabular-nums;
       }
-      .datestr {
+      .clock-date {
         font-size: 12px;
         color: var(--muted);
         margin-top: 3px;
       }
 
-      /* Section cards */
-      .sec {
+      /* ── Section Cards ── */
+      .section {
         background: var(--surface);
-        border: 0.5px solid var(--border2);
-        border-radius: 14px;
-        padding: 1.125rem;
-        margin-bottom: 0.875rem;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1rem;
       }
-      .sec-title {
-        font-size: 11px;
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 1rem;
+      }
+      .section-dot {
+        width: 3px;
+        height: 16px;
+        background: var(--red);
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-size: 12px;
         font-weight: 600;
         color: var(--muted);
         letter-spacing: 0.8px;
         text-transform: uppercase;
-        margin-bottom: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-      }
-      .sec-title::before {
-        content: "";
-        width: 3px;
-        height: 14px;
-        background: var(--red);
-        border-radius: 2px;
-        display: inline-block;
       }
 
-      /* Buttons */
-      .btn {
-        padding: 10px 12px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.18s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-      }
-      .btn:active {
-        transform: scale(0.97);
-      }
-      .btn-red {
-        background: var(--red);
-        color: #fff;
-      }
-      .btn-red:hover {
-        background: var(--red-light);
-      }
-      .btn-ghost {
-        background: var(--surface2);
-        color: var(--text);
-        border-color: var(--border2);
-      }
-      .btn-ghost:hover {
-        border-color: var(--amber);
-        color: var(--amber);
-      }
-      .btn-ghost-red {
-        background: var(--surface2);
-        color: var(--red-light);
-        border-color: var(--border2);
-      }
-      .btn-ghost-red:hover {
-        border-color: var(--red);
-      }
-      .btn-full {
-        width: 100%;
-      }
-      .btn-grid {
+      /* ── Attendance Buttons ── */
+      .att-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-top: 0.875rem;
       }
-      .span2 {
+      .att-grid .btn:first-child {
         grid-column: span 2;
       }
 
-      .spin-btn {
-        width: 14px;
-        height: 14px;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: sp 0.6s linear infinite;
-        display: none;
+      /* ── Attendance Log ── */
+      .att-log {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-top: 0.875rem;
       }
-      .loading .spin-btn {
-        display: inline-block;
+      .att-log-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface2);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        border: 0.5px solid var(--b);
       }
-      .loading .btn-text {
-        display: none;
+      .att-log-action {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .att-log-time {
+        font-size: 12px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
       }
 
+      /* ── Collapsible ── */
       .collapsible {
         display: none;
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 0.5px solid var(--border);
+        margin-top: 0.875rem;
+        padding-top: 0.875rem;
+        border-top: 0.5px solid var(--b);
       }
       .collapsible.open {
         display: block;
       }
-      .inp-field {
-        margin-bottom: 0.75rem;
+      .collapsible .field {
+        margin-bottom: 0.875rem;
       }
-      .inp-field label {
+      .collapsible .field label {
         font-size: 12px;
         color: var(--muted);
         display: block;
         margin-bottom: 4px;
       }
-      .inp-field textarea {
+      .collapsible textarea {
         width: 100%;
         background: var(--surface2);
-        border: 0.5px solid var(--border2);
-        border-radius: 8px;
-        padding: 9px 12px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
         font-size: 14px;
         color: var(--text);
         font-family: inherit;
         outline: none;
         resize: vertical;
-        min-height: 60px;
-        transition: border-color 0.2s;
+        min-height: 70px;
         direction: rtl;
+        transition: border-color 0.2s;
       }
-      .inp-field textarea:focus {
+      .collapsible textarea:focus {
         border-color: var(--red);
       }
 
-      /* Handover buttons */
-      .hbtns {
+      /* ── Handover ── */
+      .handover-btns {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-top: 0.5rem;
+        margin-top: 0.625rem;
       }
       .hbtn {
-        padding: 14px 8px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        border: 1px solid var(--border2);
-        background: var(--surface2);
-        color: var(--text);
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 5px;
-        transition: all 0.18s;
+        padding: 14px 8px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        border: 0.5px solid var(--b2);
+        background: var(--surface2);
+        color: var(--text);
+        transition: all 0.2s;
       }
       .hbtn:active {
         transform: scale(0.97);
       }
       .hbtn-icon {
         font-size: 20px;
+        line-height: 1;
       }
       .hbtn.ok:hover,
-      .hbtn.ok.sel {
+      .hbtn.ok.selected {
         background: var(--green-bg);
-        border-color: var(--green-border);
+        border-color: var(--green-br);
         color: var(--green);
       }
       .hbtn.nok:hover,
-      .hbtn.nok.sel {
+      .hbtn.nok.selected {
         background: var(--red-bg);
-        border-color: var(--red-border);
-        color: var(--red-light);
+        border-color: var(--red-br);
+        color: var(--red-h);
       }
 
-      /* Tasks */
-      .tasks-list {
+      /* ── Tasks ── */
+      .tasks-summary {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        gap: 7px;
+        margin-bottom: 0.875rem;
       }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .badge-green {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .badge-amber {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .badge-red {
+        background: var(--red-bg);
+        color: var(--red-h);
+      }
+      .badge-muted {
+        background: var(--surface2);
+        color: var(--muted);
+      }
+
       .task-item {
         background: var(--surface2);
-        border: 0.5px solid var(--border2);
-        border-radius: 11px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-sm);
         padding: 12px 14px;
+        margin-bottom: 8px;
         transition: border-color 0.2s;
       }
+      .task-item:last-child {
+        margin-bottom: 0;
+      }
       .task-item.done {
-        border-color: var(--green-border);
+        border-color: var(--green-br);
         background: rgba(76, 175, 80, 0.04);
       }
       .task-item.flagged {
-        border-color: var(--red-border);
+        border-color: var(--red-br);
       }
       .task-top {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 10px;
-        margin-bottom: 8px;
       }
       .task-text {
         font-size: 14px;
@@ -530,72 +612,53 @@
         color: var(--muted);
         font-weight: 400;
       }
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 3px 9px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 500;
-        white-space: nowrap;
-      }
-      .badge-g {
-        background: var(--green-bg);
-        color: var(--green);
-      }
-      .badge-p {
-        background: var(--amber-bg);
-        color: var(--amber);
-      }
-      .badge-r {
-        background: var(--red-bg);
-        color: var(--red-light);
-      }
-      .task-btns {
+      .task-actions {
         display: flex;
         gap: 6px;
+        margin-top: 10px;
       }
-      .tbtn {
+      .task-btn {
         padding: 6px 12px;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         font-size: 12px;
         font-weight: 500;
         font-family: inherit;
         cursor: pointer;
         border: 0.5px solid;
-        transition: all 0.18s;
+        transition: all 0.2s;
       }
-      .tbtn-done {
-        border-color: var(--green-border);
+      .task-btn-done {
+        border-color: var(--green-br);
         background: var(--green-bg);
         color: var(--green);
       }
-      .tbtn-done:hover {
+      .task-btn-done:hover {
         background: rgba(76, 175, 80, 0.2);
       }
-      .tbtn-no {
-        border-color: var(--border2);
+      .task-btn-note {
+        border-color: var(--b2);
         background: transparent;
         color: var(--muted);
       }
-      .tbtn-no:hover {
-        border-color: var(--red-border);
-        color: var(--red-light);
+      .task-btn-note:hover {
+        border-color: var(--red-br);
+        color: var(--red-h);
       }
-      .task-note-form {
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 0.5px solid var(--border);
+
+      .task-note-wrap {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 0.5px solid var(--b);
         display: none;
       }
-      .task-note-form.open {
+      .task-note-wrap.open {
         display: block;
       }
-      .task-note-form textarea {
+      .task-note-wrap textarea {
         width: 100%;
         background: var(--bg);
-        border: 0.5px solid var(--border2);
-        border-radius: 8px;
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-sm);
         padding: 8px 11px;
         font-size: 13px;
         color: var(--text);
@@ -606,151 +669,164 @@
         direction: rtl;
         transition: border-color 0.2s;
       }
-      .task-note-form textarea:focus {
+      .task-note-wrap textarea:focus {
         border-color: var(--red);
       }
-      .task-note-form button {
-        margin-top: 6px;
-        padding: 6px 14px;
-        border-radius: 7px;
-        font-size: 12px;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        background: var(--red-bg);
-        border: 0.5px solid var(--red-border);
-        color: var(--red-light);
-        transition: all 0.18s;
+      .task-note-wrap .btn {
+        margin-top: 7px;
       }
-      .task-note-form button:hover {
-        background: rgba(229, 57, 53, 0.2);
-      }
-      .saved-note {
+      .task-saved-note {
         font-size: 12px;
         color: var(--muted);
+        margin-top: 8px;
+        padding: 7px 10px;
         background: var(--bg);
-        border-radius: 7px;
-        padding: 6px 10px;
-        margin-top: 6px;
+        border-radius: var(--radius-sm);
         border-right: 2px solid var(--red);
       }
-      .saved-note span {
-        color: var(--red-light);
+      .task-saved-note strong {
+        color: var(--red-h);
         font-weight: 500;
       }
 
-      .empty {
+      .empty-state {
         text-align: center;
-        padding: 2rem 1rem;
+        padding: 2.5rem 1rem;
         color: var(--muted);
         font-size: 13px;
+        line-height: 1.6;
       }
 
-      /* Toast */
-      .toast {
+      /* ── Toast ── */
+      .toast-container {
         position: fixed;
-        bottom: 1.25rem;
+        bottom: 1.5rem;
         left: 50%;
-        transform: translateX(-50%) translateY(20px);
-        background: var(--surface);
-        border: 0.5px solid var(--border2);
-        border-radius: 10px;
-        padding: 10px 18px;
-        font-size: 13px;
-        opacity: 0;
-        transition: all 0.3s;
-        pointer-events: none;
-        white-space: nowrap;
+        transform: translateX(-50%);
         z-index: 200;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      }
+      .toast {
+        background: var(--surface);
+        border: 0.5px solid var(--b2);
+        border-radius: var(--radius-md);
+        padding: 11px 18px;
+        font-size: 13px;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       }
       .toast.show {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
       }
-      .toast.ok {
-        border-color: var(--green-border);
+      .toast.success {
+        border-color: var(--green-br);
         color: var(--green);
       }
-      .toast.err {
-        border-color: var(--red-border);
-        color: var(--red-light);
+      .toast.error {
+        border-color: var(--red-br);
+        color: var(--red-h);
+      }
+      .toast.info {
+        border-color: var(--b2);
+        color: var(--text);
+      }
+
+      /* ── Spinner ── */
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        flex-shrink: 0;
+      }
+      .spinner.dark {
+        border-color: rgba(0, 0, 0, 0.15);
+        border-top-color: #000;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body>
-    <!-- ═══ LOGIN ═══ -->
+    <!-- Config Error -->
+    <div id="config-error">
+      <div class="icon">⚠️</div>
+      <h2>الإعداد غير مكتمل</h2>
+      <p>افتح ملف <code>config.js</code> وأضف بيانات Supabase</p>
+    </div>
+
+    <!-- Login -->
     <div id="login-screen">
       <div class="login-wrap">
         <div class="brand">
-          <div class="brand-logo">
+          <div class="brand-icon">
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="#fff"
               stroke-width="2.5"
               stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
           </div>
-          <h1>Your Company</h1>
+          <h1>Kayan Store</h1>
           <p>بوابة الموظف</p>
         </div>
+
         <div class="login-card" id="login-card">
-          <h2>اكتب الكود الخاص بك</h2>
+          <h2>اكتب الكود الخاص بك للدخول</h2>
           <div class="field">
             <label>الكود الوظيفي</label>
             <input
               type="text"
-              id="l-code"
+              id="input-code"
               placeholder="مثال: S-01"
               autocomplete="off"
               oninput="this.value = this.value.toUpperCase()"
-              onkeydown="
-                if (event.key === 'Enter')
-                  document.getElementById('l-pass').focus();
-              "
+              onkeydown="if (event.key === 'Enter') focusPass();"
             />
           </div>
           <div class="field">
             <label>كلمة المرور</label>
             <input
               type="password"
-              id="l-pass"
+              id="input-pass"
               placeholder="••••••••"
-              onkeydown="if (event.key === 'Enter') doLogin();"
+              onkeydown="if (event.key === 'Enter') handleLogin();"
             />
           </div>
-          <button class="btn-login" id="btn-login" onclick="doLogin()">
-            <span id="login-label">دخول</span>
+          <button class="btn btn-red" id="login-btn" onclick="handleLogin()">
+            <span id="login-btn-text">دخول</span>
           </button>
-          <div class="login-err" id="login-err">الكود أو كلمة المرور غلط</div>
+          <div class="error-msg" id="login-error">الكود أو كلمة المرور غلط</div>
         </div>
-        <div style="text-align: center; margin-top: 1.25rem">
-          <a
-            href="admin.html"
-            style="
-              font-size: 12px;
-              color: var(--muted);
-              text-decoration: none;
-              border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
-              padding-bottom: 2px;
-              transition: color 0.2s;
-            "
-            onmouseover="this.style.color = 'var(--red-light)'"
-            onmouseout="this.style.color = 'var(--muted)'"
-            >لوحة المدير ←</a
-          >
+
+        <div class="login-footer">
+          <a href="admin.html">لوحة المدير ←</a>
         </div>
       </div>
     </div>
 
-    <!-- ═══ DASHBOARD ═══ -->
+    <!-- Dashboard -->
     <div id="dashboard">
       <div class="topbar">
-        <div class="topbar-brand">
+        <div class="topbar-left">
           <div class="topbar-logo">
             <svg
               viewBox="0 0 24 24"
@@ -758,71 +834,87 @@
               stroke="#fff"
               stroke-width="2.5"
               stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
               <line x1="3" y1="6" x2="21" y2="6" />
             </svg>
           </div>
-          <span class="topbar-name">Your Company</span>
+          <span class="topbar-brand">Kayan Store</span>
         </div>
         <div class="topbar-right">
-          <div class="seller-pill">
-            <div class="av" id="s-av">K</div>
-            <div class="info">
-              <div class="sname" id="s-name">—</div>
-              <div class="scode" id="s-code">—</div>
+          <div class="seller-chip">
+            <div class="seller-avatar" id="seller-avatar">K</div>
+            <div>
+              <div class="seller-name" id="seller-name">—</div>
+              <div class="seller-code" id="seller-code">—</div>
             </div>
           </div>
-          <button class="btn-out" onclick="doLogout()">خروج</button>
+          <button class="logout-btn" onclick="handleLogout()">خروج</button>
         </div>
       </div>
 
       <div class="content">
+        <!-- Clock -->
         <div class="clock-card">
-          <div class="clock" id="clock">00:00:00</div>
-          <div class="datestr" id="datestr"></div>
+          <div class="clock-display" id="clock">00:00:00</div>
+          <div class="clock-date" id="clock-date"></div>
         </div>
 
-        <!-- ATTENDANCE -->
-        <div class="sec">
-          <div class="sec-title">تسجيل الحضور</div>
-          <div class="btn-grid">
+        <!-- Attendance -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-dot"></div>
+            <span class="section-title">تسجيل الحضور</span>
+          </div>
+          <div class="att-grid">
             <button
-              class="btn btn-red span2"
-              id="btn-in"
-              onclick="record('حضور')"
+              class="btn btn-red"
+              id="btn-attend"
+              onclick="recordAttendance('حضور')"
             >
-              <span class="btn-text">✓ تسجيل حضور</span>
-              <span class="spin-btn"></span>
+              <span id="btn-attend-content">✓ تسجيل حضور</span>
             </button>
-            <button class="btn btn-ghost" onclick="record('انصراف')">
+            <button class="btn btn-ghost" onclick="recordAttendance('انصراف')">
               انصراف
             </button>
             <button
               class="btn btn-ghost-red"
-              onclick="toggleCollapse('abs-wrap')"
+              onclick="toggleSection('section-absence')"
             >
               تسجيل غياب
             </button>
           </div>
-          <div class="collapsible" id="abs-wrap">
-            <div class="inp-field" style="margin-top: 0.5rem">
+          <div class="collapsible" id="section-absence">
+            <div class="field">
               <label>سبب الغياب</label>
-              <textarea id="abs-note" placeholder="اكتب السبب..."></textarea>
+              <textarea
+                id="absence-note"
+                placeholder="اكتب السبب..."
+              ></textarea>
             </div>
-            <button class="btn btn-ghost-red btn-full" onclick="record('غياب')">
+            <button
+              class="btn btn-ghost-red"
+              onclick="recordAttendance('غياب')"
+            >
               تأكيد الغياب
             </button>
           </div>
+          <div class="att-log" id="att-log"></div>
         </div>
 
-        <!-- SHIFT HANDOVER -->
-        <div class="sec">
-          <div class="sec-title">تسليم الشيفت</div>
-          <label style="font-size: 13px; color: var(--muted)"
-            >استلمت الكومنتات والرسايل من الشيفت اللي فات؟</label
+        <!-- Shift Handover -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-dot"></div>
+            <span class="section-title">تسليم الشيفت</span>
+          </div>
+          <p
+            style="font-size: 13px; color: var(--muted); margin-bottom: 0.5rem"
           >
-          <div class="hbtns">
+            استلمت الكومنتات والرسايل من الشيفت اللي فات؟
+          </p>
+          <div class="handover-btns">
             <button class="hbtn ok" id="hbtn-ok" onclick="selectHandover('ok')">
               <span class="hbtn-icon">✓</span>
               <span>تمام، استلمت</span>
@@ -836,56 +928,60 @@
               <span>مش تمام</span>
             </button>
           </div>
-          <div class="collapsible" id="ho-problem">
-            <div class="inp-field" style="margin-top: 0.5rem">
-              <label>وضّح المشكلة</label>
+          <div class="collapsible" id="section-handover-problem">
+            <div class="field">
+              <label>وضّح المشكلة بالتفصيل</label>
               <textarea
-                id="ho-note"
-                placeholder="إيه اللي مش تمام؟ وضّح بالتفصيل..."
+                id="handover-note"
+                placeholder="إيه اللي مش تمام؟"
               ></textarea>
             </div>
           </div>
           <button
-            class="btn btn-red btn-full"
+            class="btn btn-red"
             style="margin-top: 0.875rem"
-            id="btn-ho"
+            id="btn-handover"
             onclick="submitHandover()"
           >
-            <span class="btn-text">حفظ تسليم الشيفت</span>
-            <span class="spin-btn"></span>
+            <span id="btn-handover-content">حفظ تسليم الشيفت</span>
           </button>
         </div>
 
-        <!-- TASKS -->
-        <div class="sec">
-          <div class="sec-title">التاسكات بتاعتي</div>
-          <div id="tasks-wrap">
-            <div class="empty">جاري تحميل التاسكات...</div>
+        <!-- Tasks -->
+        <div class="section">
+          <div class="section-header">
+            <div class="section-dot"></div>
+            <span class="section-title">التاسكات بتاعتي</span>
+          </div>
+          <div id="tasks-container">
+            <div class="empty-state">جاري تحميل التاسكات...</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
 
     <script>
-      // =============================================
-      // ⚙️ ضع بيانات Supabase هنا
-      // =============================================
-      const SUPABASE_URL = "https://moeolrwkmvicpxjhuqmc.supabase.co";
-      const SUPABASE_ANON_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtubWZja3p3d2JibXN0c2N5dmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNzI3MTIsImV4cCI6MjA5MTY0ODcxMn0.kQJA1l5o3_stvE_SXcmuBNNbPx7D28BhNANn8seoFBM";
-      // =============================================
-
-      if ((SUPABASE_URL = "https://moeolrwkmvicpxjhuqmc.supabase.co")) {
-        document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:32px">⚠️</div><div style="font-size:16px;font-weight:500">Supabase مش متربط</div><div style="font-size:13px;color:#777;max-width:300px">افتح الملف وحط الـ SUPABASE_URL و SUPABASE_ANON_KEY</div></div>`;
+      // ── Guard ──
+      if (
+        !window.CONFIG ||
+        CONFIG.supabaseUrl === "https://knmfckzwwbbmstscyvdz.supabase.co"
+      ) {
+        document.getElementById("config-error").style.display = "flex";
+        document.getElementById("login-screen").style.display = "none";
       }
 
+      // ── Supabase ──
       const { createClient } = supabase;
-      const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      let ME = null;
+      const db = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
 
-      // Clock
+      // ── State ──
+      let currentSeller = null;
+      let handoverStatus = null;
+
+      // ── Clock ──
       const DAYS = [
         "الأحد",
         "الاثنين",
@@ -909,293 +1005,415 @@
         "نوفمبر",
         "ديسمبر",
       ];
+
       function pad(n) {
         return String(n).padStart(2, "0");
       }
-      function tick() {
-        const n = new Date();
-        document.getElementById("clock").textContent =
-          pad(n.getHours()) +
-          ":" +
-          pad(n.getMinutes()) +
-          ":" +
-          pad(n.getSeconds());
-        document.getElementById("datestr").textContent =
-          DAYS[n.getDay()] +
-          "، " +
-          n.getDate() +
-          " " +
-          MONTHS[n.getMonth()] +
-          " " +
-          n.getFullYear();
-      }
-      tick();
-      setInterval(tick, 1000);
 
-      function toast(msg, type = "ok") {
-        const el = document.getElementById("toast");
-        el.textContent = msg;
-        el.className = "toast show " + type;
-        setTimeout(() => el.classList.remove("show"), 3500);
+      function updateClock() {
+        const now = new Date();
+        document.getElementById("clock").textContent =
+          pad(now.getHours()) +
+          ":" +
+          pad(now.getMinutes()) +
+          ":" +
+          pad(now.getSeconds());
+        document.getElementById("clock-date").textContent =
+          DAYS[now.getDay()] +
+          "، " +
+          now.getDate() +
+          " " +
+          MONTHS[now.getMonth()] +
+          " " +
+          now.getFullYear();
       }
-      function toggleCollapse(id) {
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // ── Toast ──
+      function showToast(message, type = "info", duration = 3500) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast " + type;
+        toast.textContent = message;
+        container.appendChild(toast);
+        requestAnimationFrame(() => {
+          toast.classList.add("show");
+        });
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      }
+
+      // ── UI Helpers ──
+      function setButtonLoading(btnId, contentId, loading) {
+        const btn = document.getElementById(btnId);
+        const content = document.getElementById(contentId);
+        btn.disabled = loading;
+        content.innerHTML = loading
+          ? '<div class="spinner"></div>'
+          : content.dataset.original || content.textContent;
+      }
+
+      function toggleSection(id) {
         document.getElementById(id).classList.toggle("open");
       }
 
-      // ─── LOGIN ───
-      async function doLogin() {
+      function focusPass() {
+        document.getElementById("input-pass").focus();
+      }
+
+      // ── Auth ──
+      async function handleLogin() {
         const code = document
-          .getElementById("l-code")
+          .getElementById("input-code")
           .value.trim()
           .toUpperCase();
-        const pass = document.getElementById("l-pass").value;
+        const pass = document.getElementById("input-pass").value;
+        const errorEl = document.getElementById("login-error");
+        const card = document.getElementById("login-card");
+
+        errorEl.style.display = "none";
+
         if (!code || !pass) {
-          showLoginErr("من فضلك ادخل الكود وكلمة المرور");
+          showLoginError("من فضلك ادخل الكود وكلمة المرور");
           return;
         }
-        const btn = document.getElementById("btn-login");
+
+        const btn = document.getElementById("login-btn");
+        const btnText = document.getElementById("login-btn-text");
         btn.disabled = true;
-        document.getElementById("login-label").innerHTML =
-          '<div class="spin-sm"></div>';
-        document.getElementById("login-err").style.display = "none";
+        btnText.innerHTML = '<div class="spinner"></div>';
+
         const { data, error } = await db
           .from("sellers")
-          .select("*")
+          .select("id, name, code, password")
           .eq("code", code)
           .single();
+
         btn.disabled = false;
-        document.getElementById("login-label").textContent = "دخول";
+        btnText.textContent = "دخول";
+
         if (error || !data || data.password !== pass) {
-          shakeCard();
-          showLoginErr("الكود أو كلمة المرور غلط");
+          card.classList.remove("shake");
+          void card.offsetWidth;
+          card.classList.add("shake");
+          showLoginError("الكود أو كلمة المرور غلط");
+          document.getElementById("input-pass").value = "";
           return;
         }
-        ME = data;
+
+        currentSeller = data;
         sessionStorage.setItem("kayan_seller", JSON.stringify(data));
         enterDashboard(data);
       }
-      function showLoginErr(msg) {
-        const el = document.getElementById("login-err");
-        el.textContent = msg;
+
+      function showLoginError(message) {
+        const el = document.getElementById("login-error");
+        el.textContent = message;
         el.style.display = "block";
       }
-      function shakeCard() {
-        const c = document.getElementById("login-card");
-        c.classList.remove("shake");
-        void c.offsetWidth;
-        c.classList.add("shake");
+
+      function handleLogout() {
+        sessionStorage.removeItem("kayan_seller");
+        currentSeller = null;
+        handoverStatus = null;
+        document.getElementById("dashboard").style.display = "none";
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("input-pass").value = "";
+        document.getElementById("login-error").style.display = "none";
       }
 
       function enterDashboard(seller) {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
-        document.getElementById("s-name").textContent = seller.name;
-        document.getElementById("s-code").textContent = seller.code;
-        document.getElementById("s-av").textContent = seller.name
+        document.getElementById("seller-avatar").textContent = seller.name
           .trim()[0]
           .toUpperCase();
+        document.getElementById("seller-name").textContent = seller.name;
+        document.getElementById("seller-code").textContent = seller.code;
+        loadAttendanceLog();
         loadTasks();
-        db.channel("tasks-" + seller.code)
+        // Real-time: reload tasks when admin adds/edits
+        db.channel("seller-tasks-" + seller.code)
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
               table: "tasks",
-              filter: `seller_code=eq.${seller.code}`,
+              filter: "seller_code=eq." + seller.code,
             },
-            () => loadTasks(),
+            loadTasks,
           )
           .subscribe();
       }
-      function doLogout() {
-        sessionStorage.removeItem("kayan_seller");
-        ME = null;
-        document.getElementById("dashboard").style.display = "none";
-        document.getElementById("login-screen").style.display = "flex";
-        document.getElementById("l-pass").value = "";
-        document.getElementById("login-err").style.display = "none";
-      }
-      // Auto-login
-      try {
-        const s = sessionStorage.getItem("kayan_seller");
-        if (s) {
-          ME = JSON.parse(s);
-          enterDashboard(ME);
-        }
-      } catch (e) {
-        sessionStorage.removeItem("kayan_seller");
-      }
 
-      // ─── ATTENDANCE ───
-      async function record(action) {
-        if (!ME) return;
-        const note = document.getElementById("abs-note").value.trim();
-        const btn = document.getElementById("btn-in");
-        btn.classList.add("loading");
+      // Auto-login from session
+      window.addEventListener("load", () => {
+        try {
+          const saved = sessionStorage.getItem("kayan_seller");
+          if (saved) {
+            currentSeller = JSON.parse(saved);
+            enterDashboard(currentSeller);
+          }
+        } catch {
+          sessionStorage.removeItem("kayan_seller");
+        }
+      });
+
+      // ── Attendance ──
+      async function recordAttendance(action) {
+        if (!currentSeller) return;
+
+        const note = document.getElementById("absence-note").value.trim();
+        const btn = document.getElementById("btn-attend");
+        const content = document.getElementById("btn-attend-content");
+
         btn.disabled = true;
+        const originalText = content.textContent;
+        content.innerHTML = '<div class="spinner"></div>';
+
         const { error } = await db.from("attendance").insert({
-          seller_code: ME.code,
-          employee_name: ME.name,
+          seller_code: currentSeller.code,
+          employee_name: currentSeller.name,
           action,
           note: note || null,
         });
-        btn.classList.remove("loading");
+
         btn.disabled = false;
+        content.textContent = originalText;
+
         if (error) {
-          toast("حصل خطأ، حاول تاني", "err");
+          showToast("حصل خطأ، حاول تاني", "error");
           return;
         }
-        const msgs = {
+
+        const messages = {
           حضور: "تم تسجيل حضورك ✓",
           انصراف: "تم تسجيل انصرافك ✓",
           غياب: "تم تسجيل غيابك ✓",
         };
-        toast(msgs[action]);
-        document.getElementById("abs-note").value = "";
-        document.getElementById("abs-wrap").classList.remove("open");
+        showToast(messages[action], "success");
+        document.getElementById("absence-note").value = "";
+        document.getElementById("section-absence").classList.remove("open");
+        loadAttendanceLog();
       }
 
-      // ─── HANDOVER ───
-      let hoStatus = null;
-      function selectHandover(val) {
-        hoStatus = val;
+      async function loadAttendanceLog() {
+        if (!currentSeller) return;
+        const today = new Date().toISOString().split("T")[0];
+        const { data } = await db
+          .from("attendance")
+          .select("action, recorded_at")
+          .eq("seller_code", currentSeller.code)
+          .eq("date", today)
+          .order("recorded_at", { ascending: true });
+
+        const container = document.getElementById("att-log");
+        if (!data || !data.length) {
+          container.innerHTML = "";
+          return;
+        }
+
+        const colors = {
+          حضور: { border: "var(--green-br)", text: "var(--green)" },
+          انصراف: { border: "var(--amber-br)", text: "var(--amber)" },
+          غياب: { border: "var(--red-br)", text: "var(--red-h)" },
+        };
+
+        container.innerHTML = data
+          .map((record) => {
+            const d = new Date(record.recorded_at);
+            const time = pad(d.getHours()) + ":" + pad(d.getMinutes());
+            const c = colors[record.action] || {};
+            return `<div class="att-log-item" style="border-color:${c.border}">
+      <span class="att-log-action" style="color:${c.text}">${record.action}</span>
+      <span class="att-log-time">${time}</span>
+    </div>`;
+          })
+          .join("");
+      }
+
+      // ── Shift Handover ──
+      function selectHandover(status) {
+        handoverStatus = status;
         document
           .getElementById("hbtn-ok")
-          .classList.toggle("sel", val === "ok");
+          .classList.toggle("selected", status === "ok");
         document
           .getElementById("hbtn-nok")
-          .classList.toggle("sel", val === "nok");
-        val === "nok"
-          ? document.getElementById("ho-problem").classList.add("open")
-          : document.getElementById("ho-problem").classList.remove("open");
-      }
-      async function submitHandover() {
-        if (!ME) return;
-        if (!hoStatus) {
-          toast("اختار تمام أو مش تمام", "err");
-          return;
-        }
-        const btn = document.getElementById("btn-ho");
-        btn.classList.add("loading");
-        btn.disabled = true;
-        const note = document.getElementById("ho-note").value.trim();
-        const { error } = await db.from("shift_handovers").insert({
-          seller_code: ME.code,
-          employee_name: ME.name,
-          status: hoStatus,
-          note: note || null,
-        });
-        btn.classList.remove("loading");
-        btn.disabled = false;
-        if (error) {
-          toast("حصل خطأ", "err");
-          return;
-        }
-        toast(hoStatus === "ok" ? "تم تسجيل التسليم ✓" : "تم رفع المشكلة ✓");
-        hoStatus = null;
-        document.getElementById("hbtn-ok").classList.remove("sel");
-        document.getElementById("hbtn-nok").classList.remove("sel");
-        document.getElementById("ho-note").value = "";
-        document.getElementById("ho-problem").classList.remove("open");
+          .classList.toggle("selected", status === "nok");
+        const problemSection = document.getElementById(
+          "section-handover-problem",
+        );
+        status === "nok"
+          ? problemSection.classList.add("open")
+          : problemSection.classList.remove("open");
       }
 
-      // ─── TASKS ───
+      async function submitHandover() {
+        if (!currentSeller) return;
+        if (!handoverStatus) {
+          showToast("اختار تمام أو مش تمام الأول", "error");
+          return;
+        }
+
+        const btn = document.getElementById("btn-handover");
+        const content = document.getElementById("btn-handover-content");
+        btn.disabled = true;
+        const originalText = content.textContent;
+        content.innerHTML = '<div class="spinner"></div>';
+
+        const note = document.getElementById("handover-note").value.trim();
+        const { error } = await db.from("shift_handovers").insert({
+          seller_code: currentSeller.code,
+          employee_name: currentSeller.name,
+          status: handoverStatus,
+          note: note || null,
+        });
+
+        btn.disabled = false;
+        content.textContent = originalText;
+
+        if (error) {
+          showToast("حصل خطأ، حاول تاني", "error");
+          return;
+        }
+
+        showToast(
+          handoverStatus === "ok" ? "تم تسجيل التسليم ✓" : "تم رفع المشكلة ✓",
+          "success",
+        );
+        handoverStatus = null;
+        document.getElementById("hbtn-ok").classList.remove("selected");
+        document.getElementById("hbtn-nok").classList.remove("selected");
+        document.getElementById("handover-note").value = "";
+        document
+          .getElementById("section-handover-problem")
+          .classList.remove("open");
+      }
+
+      // ── Tasks ──
       async function loadTasks() {
-        if (!ME) return;
+        if (!currentSeller) return;
         const today = new Date().toISOString().split("T")[0];
         const { data, error } = await db
           .from("tasks")
           .select("*")
-          .eq("seller_code", ME.code)
+          .eq("seller_code", currentSeller.code)
           .eq("date", today)
           .order("recorded_at", { ascending: true });
-        const wrap = document.getElementById("tasks-wrap");
+
+        const container = document.getElementById("tasks-container");
+
         if (error) {
-          wrap.innerHTML = '<div class="empty">حصل خطأ في التحميل</div>';
+          container.innerHTML =
+            '<div class="empty-state">حصل خطأ في تحميل التاسكات</div>';
           return;
         }
         if (!data || !data.length) {
-          wrap.innerHTML =
-            '<div class="empty">ما فيش تاسكات محددة ليك النهارده</div>';
+          container.innerHTML =
+            '<div class="empty-state">ما فيش تاسكات محددة ليك النهارده</div>';
           return;
         }
-        const done = data.filter((t) => t.status === "done").length;
-        wrap.innerHTML = `
-    <div style="display:flex;gap:7px;margin-bottom:.875rem;">
-      <span class="badge badge-g">خلصت: ${done}</span>
-      <span class="badge badge-p">باقي: ${data.length - done}</span>
+
+        const doneCount = data.filter((t) => t.status === "done").length;
+        const pendingCount = data.length - doneCount;
+
+        container.innerHTML = `
+    <div class="tasks-summary">
+      <span class="badge badge-green">خلصت: ${doneCount}</span>
+      <span class="badge badge-amber">باقي: ${pendingCount}</span>
     </div>
-    <div class="tasks-list">
-      ${data.map((t) => taskHTML(t)).join("")}
-    </div>`;
+    ${data.map((task) => renderTaskItem(task)).join("")}
+  `;
       }
 
-      function taskHTML(t) {
-        const isDone = t.status === "done";
-        const hasSavedNote = t.note && !isDone;
+      function renderTaskItem(task) {
+        const isDone = task.status === "done";
+        const isFlagged = task.note && !isDone;
         return `
-    <div class="task-item ${isDone ? "done" : ""} ${hasSavedNote ? "flagged" : ""}" id="ti-${t.id}">
+    <div class="task-item ${isDone ? "done" : ""} ${isFlagged ? "flagged" : ""}" id="task-${task.id}">
       <div class="task-top">
-        <div class="task-text">${t.task_text}</div>
-        <span class="badge ${isDone ? "badge-g" : "badge-p"}">${isDone ? "✓ خلصت" : "قيد التنفيذ"}</span>
+        <div class="task-text">${escapeHtml(task.task_text)}</div>
+        <span class="badge ${isDone ? "badge-green" : "badge-amber"}">${isDone ? "✓ خلصت" : "جاري"}</span>
       </div>
-      ${hasSavedNote ? `<div class="saved-note"><span>ملاحظة:</span> ${t.note}</div>` : ""}
+      ${isFlagged ? `<div class="task-saved-note"><strong>ملاحظة:</strong> ${escapeHtml(task.note)}</div>` : ""}
       ${
         !isDone
           ? `
-        <div class="task-btns">
-          <button class="tbtn tbtn-done" onclick="markDone('${t.id}')">✓ خلصت</button>
-          <button class="tbtn tbtn-no" onclick="toggleTaskNote('${t.id}')">لا، مخلصتش</button>
+        <div class="task-actions">
+          <button class="task-btn task-btn-done" onclick="markTaskDone('${task.id}')">✓ خلصت</button>
+          <button class="task-btn task-btn-note" onclick="toggleTaskNote('${task.id}')">مش خلصت؟</button>
         </div>
-        <div class="task-note-form" id="tnf-${t.id}">
-          <textarea id="tnt-${t.id}" placeholder="ليه مخلصتش؟ وضّح..."></textarea>
-          <button onclick="saveTaskNote('${t.id}')">حفظ الملاحظة</button>
-        </div>`
+        <div class="task-note-wrap" id="note-wrap-${task.id}">
+          <textarea id="note-text-${task.id}" placeholder="ليه مخلصتش؟ وضّح..."></textarea>
+          <button class="btn btn-ghost-red btn-sm" onclick="saveTaskNote('${task.id}')">حفظ الملاحظة</button>
+        </div>
+      `
           : ""
       }
     </div>`;
       }
 
-      function toggleTaskNote(id) {
-        document.getElementById("tnf-" + id).classList.toggle("open");
+      function toggleTaskNote(taskId) {
+        document.getElementById("note-wrap-" + taskId).classList.toggle("open");
       }
 
-      async function markDone(id) {
-        const el = document.getElementById("ti-" + id);
-        if (el) {
-          el.style.opacity = ".5";
-          el.style.pointerEvents = "none";
+      async function markTaskDone(taskId) {
+        const row = document.getElementById("task-" + taskId);
+        if (row) {
+          row.style.opacity = ".5";
+          row.style.pointerEvents = "none";
         }
+
         const { error } = await db
           .from("tasks")
           .update({ status: "done", completed_at: new Date().toISOString() })
-          .eq("id", id);
+          .eq("id", taskId);
+
         if (error) {
-          toast("حصل خطأ", "err");
-          if (el) {
-            el.style.opacity = "1";
-            el.style.pointerEvents = "";
+          showToast("حصل خطأ، حاول تاني", "error");
+          if (row) {
+            row.style.opacity = "1";
+            row.style.pointerEvents = "";
           }
           return;
         }
-        toast("تم تسجيل إنهاء التاسك ✓");
+        showToast("تم تسجيل إنهاء التاسك ✓", "success");
         loadTasks();
       }
 
-      async function saveTaskNote(id) {
-        const note = document.getElementById("tnt-" + id).value.trim();
+      async function saveTaskNote(taskId) {
+        const note = document
+          .getElementById("note-text-" + taskId)
+          .value.trim();
         if (!note) {
-          toast("اكتب الملاحظة الأول", "err");
+          showToast("اكتب الملاحظة الأول", "error");
           return;
         }
-        const { error } = await db.from("tasks").update({ note }).eq("id", id);
+
+        const { error } = await db
+          .from("tasks")
+          .update({ note })
+          .eq("id", taskId);
         if (error) {
-          toast("حصل خطأ", "err");
+          showToast("حصل خطأ، حاول تاني", "error");
           return;
         }
-        toast("تم حفظ الملاحظة ✓");
+        showToast("تم حفظ الملاحظة ✓", "success");
         loadTasks();
+      }
+
+      // ── Utils ──
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
       }
     </script>
   </body>
