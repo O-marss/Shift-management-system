@@ -5,17 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kayan Store — بوابة الموظف</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-      // =============================================
-      // ⚙️ ضع بيانات Supabase هنا
-      // =============================================
-      const CONFIG = {
-        supabaseUrl: "https://knmfckzwwbbmstscyvdz.supabase.co",
-        supabaseKey:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtubWZja3p3d2JibXN0c2N5dmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNzI3MTIsImV4cCI6MjA5MTY0ODcxMn0.kQJA1l5o3_stvE_SXcmuBNNbPx7D28BhNANn8seoFBM",
-      };
-      // =============================================
-    </script>
+    <script src="config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -774,7 +764,7 @@
     <div id="config-error">
       <div class="icon">⚠️</div>
       <h2>الإعداد غير مكتمل</h2>
-      <p>افتح ملف <code>index.html</code> وأضف بيانات Supabase في أول الكود</p>
+      <p>افتح ملف <code>config.js</code> وأضف بيانات Supabase</p>
     </div>
 
     <!-- Login -->
@@ -975,7 +965,10 @@
 
     <script>
       // ── Guard ──
-      if (!window.CONFIG || CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
+      if (
+        !window.CONFIG ||
+        CONFIG.supabaseUrl === "https://knmfckzwwbbmstscyvdz.supabase.co"
+      ) {
         document.getElementById("config-error").style.display = "flex";
         document.getElementById("login-screen").style.display = "none";
       }
