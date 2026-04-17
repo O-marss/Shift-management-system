@@ -965,10 +965,7 @@
 
     <script>
       // ── Guard ──
-      if (
-        !window.CONFIG ||
-        CONFIG.supabaseUrl === "https://knmfckzwwbbmstscyvdz.supabase.co"
-      ) {
+      if (!window.CONFIG || CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
         document.getElementById("config-error").style.display = "flex";
         document.getElementById("login-screen").style.display = "none";
       }
