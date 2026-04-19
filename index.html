@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kayan Store — بوابة الموظف</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <script>
       // =============================================
       // ⚙️ ضع بيانات Supabase هنا
@@ -975,10 +975,20 @@
 
     <script>
       // ── Guard ──
-      if (!window.CONFIG || CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
-        document.getElementById("config-error").style.display = "flex";
-        document.getElementById("login-screen").style.display = "none";
-      }
+      (function () {
+        const url = window.CONFIG && CONFIG.supabaseUrl;
+        const key = window.CONFIG && CONFIG.supabaseKey;
+        if (
+          !url ||
+          url === "YOUR_SUPABASE_URL" ||
+          !key ||
+          key === "YOUR_SUPABASE_ANON_KEY"
+        ) {
+          document.getElementById("config-error").style.display = "flex";
+          document.getElementById("login-screen").style.display = "none";
+          throw new Error("CONFIG_MISSING");
+        }
+      })();
 
       // ── Supabase ──
       const { createClient } = supabase;

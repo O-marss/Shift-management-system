@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kayan Store — لوحة المدير</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <script>
 // =============================================
 // ⚙️ ضع بيانات Supabase هنا
@@ -365,9 +365,15 @@ tbody td { padding: 10px 14px; font-size: 13px; vertical-align: middle; }
 
 <script>
 // ── Guard ──
-if (!window.CONFIG || CONFIG.supabaseUrl === 'YOUR_SUPABASE_URL') {
-  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:40px">⚠️</div><div style="font-size:16px">افتح admin.html وأضف بيانات Supabase في أول الكود</div></div>';
-}
+(function() {
+  const url = window.CONFIG && CONFIG.supabaseUrl;
+  const key = window.CONFIG && CONFIG.supabaseKey;
+  const pwd = window.CONFIG && CONFIG.adminPassword;
+  if (!url || url === 'YOUR_SUPABASE_URL' || !key || key === 'YOUR_SUPABASE_ANON_KEY' || !pwd || pwd === 'YOUR_ADMIN_PASSWORD') {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:40px">⚠️</div><div style="font-size:16px;margin-bottom:8px">البيانات غير مكتملة في config</div><div style="font-size:13px;color:#777;max-width:300px;line-height:1.6">افتح admin.html بأي text editor، دوّر على CONFIG في أول الـ script، وغيّر القيم الـ 3</div></div>';
+    throw new Error('CONFIG_MISSING');
+  }
+})();
 
 // ── Supabase ──
 const { createClient } = supabase;
