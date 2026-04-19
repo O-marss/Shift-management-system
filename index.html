@@ -980,9 +980,10 @@
         const key = window.CONFIG && CONFIG.supabaseKey;
         if (
           !url ||
-          url === "YOUR_SUPABASE_URL" ||
+          url === "https://knmfckzwwbbmstscyvdz.supabase.co" ||
           !key ||
-          key === "YOUR_SUPABASE_ANON_KEY"
+          key ===
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtubWZja3p3d2JibXN0c2N5dmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNzI3MTIsImV4cCI6MjA5MTY0ODcxMn0.kQJA1l5o3_stvE_SXcmuBNNbPx7D28BhNANn8seoFBM"
         ) {
           document.getElementById("config-error").style.display = "flex";
           document.getElementById("login-screen").style.display = "none";
