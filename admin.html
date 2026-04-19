@@ -1,1337 +1,518 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kayan Store — لوحة المدير</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <style>
-      :root {
-        --bg: #0a0a0a;
-        --surface: #141414;
-        --surface2: #1e1e1e;
-        --b: rgba(255, 255, 255, 0.07);
-        --b2: rgba(255, 255, 255, 0.13);
-        --text: #f5f2ee;
-        --muted: #6b6b6b;
-        --red: #e53935;
-        --red-h: #ef5350;
-        --red-bg: rgba(229, 57, 53, 0.1);
-        --red-br: rgba(229, 57, 53, 0.3);
-        --green: #4caf50;
-        --green-bg: rgba(76, 175, 80, 0.1);
-        --green-br: rgba(76, 175, 80, 0.3);
-        --amber: #ff9800;
-        --amber-bg: rgba(255, 152, 0, 0.1);
-        --amber-br: rgba(255, 152, 0, 0.3);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: "IBM Plex Sans Arabic", sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        -webkit-font-smoothing: antialiased;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kayan Store — لوحة المدير</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// =============================================
+// ⚙️ ضع بيانات Supabase هنا
+// =============================================
+const CONFIG = {
+  supabaseUrl:   'https://knmfckzwwbbmstscyvdz.supabase.co',
+  supabaseKey:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtubWZja3p3d2JibXN0c2N5dmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNzI3MTIsImV4cCI6MjA5MTY0ODcxMn0.kQJA1l5o3_stvE_SXcmuBNNbPx7D28BhNANn8seoFBM',
+  adminPassword: 'pass1234',
+};
+// =============================================
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root {
+  --bg:       #0a0a0a;
+  --surface:  #141414;
+  --surface2: #1e1e1e;
+  --b:        rgba(255,255,255,0.07);
+  --b2:       rgba(255,255,255,0.13);
+  --text:     #f5f2ee;
+  --muted:    #6b6b6b;
+  --red:      #e53935;
+  --red-h:    #ef5350;
+  --red-bg:   rgba(229,57,53,0.10);
+  --red-br:   rgba(229,57,53,0.30);
+  --green:    #4caf50;
+  --green-bg: rgba(76,175,80,0.10);
+  --green-br: rgba(76,175,80,0.30);
+  --amber:    #ff9800;
+  --amber-bg: rgba(255,152,0,0.10);
+  --amber-br: rgba(255,152,0,0.30);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-      /* Login */
-      #login-screen {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        padding: 1.5rem;
-      }
-      .lbox {
-        width: 100%;
-        max-width: 360px;
-      }
-      .brand {
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-      .brand-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        background: var(--red);
-        margin-bottom: 12px;
-      }
-      .brand-icon svg {
-        width: 28px;
-        height: 28px;
-      }
-      .brand h1 {
-        font-size: 20px;
-        font-weight: 600;
-      }
-      .brand p {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 4px;
-      }
-      .lcard {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-lg);
-        padding: 1.75rem;
-      }
-      .lcard h2 {
-        font-size: 14px;
-        color: var(--muted);
-        margin-bottom: 1.25rem;
-        font-weight: 400;
-      }
-      .lcard input {
-        width: 100%;
-        background: var(--surface2);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-sm);
-        padding: 12px 14px;
-        font-size: 16px;
-        color: var(--text);
-        font-family: inherit;
-        outline: none;
-        letter-spacing: 3px;
-        text-align: center;
-        margin-bottom: 10px;
-        transition: border-color 0.2s;
-      }
-      .lcard input:focus {
-        border-color: var(--red);
-      }
-      .lerr {
-        background: var(--red-bg);
-        border: 0.5px solid var(--red-br);
-        border-radius: var(--radius-sm);
-        padding: 10px 14px;
-        font-size: 13px;
-        color: var(--red-h);
-        margin-top: 10px;
-        display: none;
-        text-align: center;
-      }
-      .shake {
-        animation: shake 0.4s ease;
-      }
-      @keyframes shake {
-        0%,
-        100% {
-          transform: translateX(0);
-        }
-        25% {
-          transform: translateX(-8px);
-        }
-        75% {
-          transform: translateX(8px);
-        }
-      }
-      .lfoot {
-        text-align: center;
-        margin-top: 1.25rem;
-      }
-      .lfoot a {
-        font-size: 12px;
-        color: var(--muted);
-        text-decoration: none;
-        transition: color 0.2s;
-      }
-      .lfoot a:hover {
-        color: var(--red-h);
-      }
+/* Login */
+#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+.lbox { width: 100%; max-width: 360px; }
+.brand { text-align: center; margin-bottom: 2rem; }
+.brand-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 16px; background: var(--red); margin-bottom: 12px; }
+.brand-icon svg { width: 28px; height: 28px; }
+.brand h1 { font-size: 20px; font-weight: 600; }
+.brand p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.lcard { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-lg); padding: 1.75rem; }
+.lcard h2 { font-size: 14px; color: var(--muted); margin-bottom: 1.25rem; font-weight: 400; }
+.lcard input { width: 100%; background: var(--surface2); border: 0.5px solid var(--b2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 16px; color: var(--text); font-family: inherit; outline: none; letter-spacing: 3px; text-align: center; margin-bottom: 10px; transition: border-color .2s; }
+.lcard input:focus { border-color: var(--red); }
+.lerr { background: var(--red-bg); border: 0.5px solid var(--red-br); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--red-h); margin-top: 10px; display: none; text-align: center; }
+.shake { animation: shake .4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.lfoot { text-align: center; margin-top: 1.25rem; }
+.lfoot a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color .2s; }
+.lfoot a:hover { color: var(--red-h); }
 
-      /* Buttons */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        padding: 10px 16px;
-        border-radius: var(--radius-md);
-        font-size: 13px;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        border: none;
-        transition: all 0.2s;
-        min-height: 40px;
-      }
-      .btn-red {
-        background: var(--red);
-        color: #fff;
-      }
-      .btn-red:hover {
-        background: var(--red-h);
-      }
-      .btn-red:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .btn-full {
-        width: 100%;
-      }
-      .btn-login {
-        width: 100%;
-        padding: 13px;
-        font-size: 15px;
-        font-weight: 600;
-        min-height: 48px;
-        background: var(--red);
-        color: #fff;
-        border-radius: var(--radius-md);
-      }
-      .btn-login:hover {
-        background: var(--red-h);
-      }
-      .btn-outline {
-        background: transparent;
-        border: 0.5px solid var(--b2);
-        color: var(--muted);
-      }
-      .btn-outline:hover {
-        border-color: var(--red-br);
-        color: var(--red-h);
-      }
-      .btn-ghost {
-        background: var(--surface2);
-        border: 0.5px solid var(--b2);
-        color: var(--text);
-      }
-      .btn-ghost:hover {
-        border-color: var(--b2);
-      }
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all .2s; min-height: 40px; }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover { background: var(--red-h); }
+.btn-red:disabled { opacity: .5; cursor: not-allowed; }
+.btn-full { width: 100%; }
+.btn-login { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; min-height: 48px; background: var(--red); color: #fff; border-radius: var(--radius-md); }
+.btn-login:hover { background: var(--red-h); }
+.btn-outline { background: transparent; border: 0.5px solid var(--b2); color: var(--muted); }
+.btn-outline:hover { border-color: var(--red-br); color: var(--red-h); }
+.btn-ghost { background: var(--surface2); border: 0.5px solid var(--b2); color: var(--text); }
+.btn-ghost:hover { border-color: var(--b2); }
 
-      /* Dashboard */
-      #dashboard {
-        display: none;
-      }
-      .topbar {
-        background: var(--surface);
-        border-bottom: 0.5px solid var(--b2);
-        padding: 0.875rem 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 50;
-      }
-      .topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .topbar-logo {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        background: var(--red);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .topbar-logo svg {
-        width: 15px;
-        height: 15px;
-      }
-      .topbar h1 {
-        font-size: 15px;
-        font-weight: 600;
-      }
-      .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .live-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--green);
-        animation: pulse 2s ease-in-out infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.4;
-        }
-      }
-      .live-label {
-        font-size: 12px;
-        color: var(--green);
-      }
-      .logout-btn {
-        background: transparent;
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-sm);
-        padding: 6px 12px;
-        font-size: 12px;
-        color: var(--muted);
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .logout-btn:hover {
-        border-color: var(--red-br);
-        color: var(--red-h);
-      }
+/* Dashboard */
+#dashboard { display: none; }
+.topbar { background: var(--surface); border-bottom: 0.5px solid var(--b2); padding: .875rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-logo { width: 30px; height: 30px; border-radius: 8px; background: var(--red); display: flex; align-items: center; justify-content: center; }
+.topbar-logo svg { width: 15px; height: 15px; }
+.topbar h1 { font-size: 15px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.live-label { font-size: 12px; color: var(--green); }
+.logout-btn { background: transparent; border: 0.5px solid var(--b2); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; color: var(--muted); font-family: inherit; cursor: pointer; transition: all .2s; }
+.logout-btn:hover { border-color: var(--red-br); color: var(--red-h); }
 
-      .main {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 1.25rem;
-        padding-bottom: 4rem;
-      }
+.main { max-width: 1000px; margin: 0 auto; padding: 1.25rem; padding-bottom: 4rem; }
 
-      /* Tabs */
-      .tabs {
-        display: flex;
-        border-bottom: 0.5px solid var(--b2);
-        margin-bottom: 1.25rem;
-      }
-      .tab {
-        padding: 9px 18px;
-        font-size: 13px;
-        cursor: pointer;
-        border: none;
-        background: transparent;
-        color: var(--muted);
-        border-bottom: 2px solid transparent;
-        margin-bottom: -1px;
-        font-family: inherit;
-        transition: all 0.2s;
-      }
-      .tab.active {
-        color: var(--text);
-        border-bottom-color: var(--red);
-        font-weight: 500;
-      }
-      .tab-pane {
-        display: none;
-      }
-      .tab-pane.active {
-        display: block;
-      }
+/* Tabs */
+.tabs { display: flex; border-bottom: 0.5px solid var(--b2); margin-bottom: 1.25rem; }
+.tab { padding: 9px 18px; font-size: 13px; cursor: pointer; border: none; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: inherit; transition: all .2s; }
+.tab.active { color: var(--text); border-bottom-color: var(--red); font-weight: 500; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
 
-      /* Stats */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 1.125rem;
-      }
-      .stat-card {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-md);
-        padding: 0.875rem 1.125rem;
-      }
-      .stat-label {
-        font-size: 11px;
-        color: var(--muted);
-        margin-bottom: 6px;
-      }
-      .stat-value {
-        font-size: 28px;
-        font-weight: 300;
-      }
-      .stat-value.green {
-        color: var(--green);
-      }
-      .stat-value.amber {
-        color: var(--amber);
-      }
-      .stat-value.red {
-        color: var(--red-h);
-      }
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.125rem; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-md); padding: .875rem 1.125rem; }
+.stat-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 300; }
+.stat-value.green { color: var(--green); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.red   { color: var(--red-h); }
 
-      /* Controls */
-      .controls {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 1rem;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .controls input[type="date"],
-      .controls select {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-sm);
-        padding: 7px 11px;
-        font-size: 13px;
-        color: var(--text);
-        font-family: inherit;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .controls input[type="date"]:focus,
-      .controls select:focus {
-        border-color: var(--red);
-      }
-      .ctrl-btn {
-        padding: 7px 13px;
-        border-radius: var(--radius-sm);
-        font-size: 13px;
-        font-family: inherit;
-        cursor: pointer;
-        border: 0.5px solid var(--b2);
-        background: var(--surface);
-        color: var(--text);
-        transition: all 0.2s;
-      }
-      .ctrl-btn:hover {
-        border-color: var(--red-br);
-        color: var(--red-h);
-      }
-      .ctrl-btn.red {
-        background: var(--red);
-        border-color: transparent;
-        color: #fff;
-        font-weight: 500;
-      }
-      .ctrl-btn.red:hover {
-        background: var(--red-h);
-        color: #fff;
-      }
-      .ml {
-        margin-right: auto;
-      }
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+.controls input[type=date], .controls select { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-sm); padding: 7px 11px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; transition: border-color .2s; }
+.controls input[type=date]:focus, .controls select:focus { border-color: var(--red); }
+.ctrl-btn { padding: 7px 13px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; border: 0.5px solid var(--b2); background: var(--surface); color: var(--text); transition: all .2s; }
+.ctrl-btn:hover { border-color: var(--red-br); color: var(--red-h); }
+.ctrl-btn.red { background: var(--red); border-color: transparent; color: #fff; font-weight: 500; }
+.ctrl-btn.red:hover { background: var(--red-h); color: #fff; }
+.ml { margin-right: auto; }
 
-      /* Table */
-      .table-wrap {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-md);
-        overflow: hidden;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      thead th {
-        padding: 10px 14px;
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--muted);
-        text-align: right;
-        border-bottom: 0.5px solid var(--b2);
-        white-space: nowrap;
-      }
-      tbody tr {
-        border-bottom: 0.5px solid var(--b);
-        transition: background 0.15s;
-      }
-      tbody tr:last-child {
-        border-bottom: none;
-      }
-      tbody tr:hover {
-        background: var(--surface2);
-      }
-      tbody td {
-        padding: 10px 14px;
-        font-size: 13px;
-        vertical-align: middle;
-      }
+/* Table */
+.table-wrap { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-md); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 10px 14px; font-size: 11px; font-weight: 500; color: var(--muted); text-align: right; border-bottom: 0.5px solid var(--b2); white-space: nowrap; }
+tbody tr { border-bottom: 0.5px solid var(--b); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 10px 14px; font-size: 13px; vertical-align: middle; }
 
-      /* Badges */
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 3px 9px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 500;
-      }
-      .badge-green {
-        background: var(--green-bg);
-        color: var(--green);
-      }
-      .badge-amber {
-        background: var(--amber-bg);
-        color: var(--amber);
-      }
-      .badge-red {
-        background: var(--red-bg);
-        color: var(--red-h);
-      }
-      .badge-muted {
-        background: var(--surface2);
-        color: var(--muted);
-      }
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge-green  { background: var(--green-bg);  color: var(--green); }
+.badge-amber  { background: var(--amber-bg);  color: var(--amber); }
+.badge-red    { background: var(--red-bg);    color: var(--red-h); }
+.badge-muted  { background: var(--surface2);  color: var(--muted); }
 
-      .code-chip {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--red-h);
-        background: var(--red-bg);
-        padding: 2px 8px;
-        border-radius: 6px;
-        letter-spacing: 0.5px;
-      }
-      .time-chip {
-        font-size: 11px;
-        color: var(--muted);
-        background: var(--surface2);
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-variant-numeric: tabular-nums;
-      }
-      .avatar {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        font-weight: 600;
-        margin-left: 9px;
-        flex-shrink: 0;
-      }
-      .av-0 {
-        background: rgba(76, 175, 80, 0.15);
-        color: var(--green);
-      }
-      .av-1 {
-        background: rgba(255, 152, 0, 0.15);
-        color: var(--amber);
-      }
-      .av-2 {
-        background: rgba(229, 57, 53, 0.15);
-        color: var(--red-h);
-      }
-      .av-3 {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--muted);
-      }
-      .emp-cell {
-        display: flex;
-        align-items: center;
-      }
-      .note-text {
-        font-size: 11px;
-        color: var(--muted);
-      }
-      .empty-state {
-        text-align: center;
-        padding: 2.5rem 1rem;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      .loading-state {
-        text-align: center;
-        padding: 1.5rem;
-        color: var(--muted);
-        font-size: 13px;
-      }
+.code-chip { font-size: 11px; font-weight: 600; color: var(--red-h); background: var(--red-bg); padding: 2px 8px; border-radius: 6px; letter-spacing: .5px; }
+.time-chip { font-size: 11px; color: var(--muted); background: var(--surface2); padding: 2px 8px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; margin-left: 9px; flex-shrink: 0; }
+.av-0 { background: rgba(76,175,80,.15);  color: var(--green); }
+.av-1 { background: rgba(255,152,0,.15);  color: var(--amber); }
+.av-2 { background: rgba(229,57,53,.15);  color: var(--red-h); }
+.av-3 { background: rgba(255,255,255,.1); color: var(--muted); }
+.emp-cell { display: flex; align-items: center; }
+.note-text { font-size: 11px; color: var(--muted); }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 13px; }
+.loading-state { text-align: center; padding: 1.5rem; color: var(--muted); font-size: 13px; }
 
-      /* Summary badges row */
-      .summary-row {
-        display: flex;
-        gap: 7px;
-        margin-bottom: 0.875rem;
-      }
+/* Summary badges row */
+.summary-row { display: flex; gap: 7px; margin-bottom: .875rem; }
 
-      /* Sellers */
-      .sellers-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-        gap: 10px;
-      }
-      .seller-card {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-md);
-        padding: 1rem;
-      }
-      .seller-card-top {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 0.75rem;
-      }
-      .seller-card-name {
-        font-size: 14px;
-        font-weight: 500;
-      }
-      .seller-card-code {
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .seller-card-pass {
-        font-size: 11px;
-        color: var(--muted);
-        background: var(--surface2);
-        border-radius: 6px;
-        padding: 3px 8px;
-        display: inline-block;
-        letter-spacing: 0.5px;
-      }
+/* Sellers */
+.sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 10px; }
+.seller-card { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-md); padding: 1rem; }
+.seller-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
+.seller-card-name { font-size: 14px; font-weight: 500; }
+.seller-card-code { font-size: 12px; color: var(--muted); }
+.seller-card-pass { font-size: 11px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 3px 8px; display: inline-block; letter-spacing: .5px; }
 
-      /* Form Section */
-      .form-section {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-md);
-        padding: 1.125rem;
-        margin-bottom: 1.25rem;
-      }
-      .form-section h3 {
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--muted);
-        margin-bottom: 0.875rem;
-      }
-      .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 8px;
-      }
-      .form-field label {
-        font-size: 11px;
-        color: var(--muted);
-        display: block;
-        margin-bottom: 4px;
-      }
-      .form-field input,
-      .form-field select {
-        width: 100%;
-        background: var(--surface2);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-sm);
-        padding: 8px 11px;
-        font-size: 13px;
-        color: var(--text);
-        font-family: inherit;
-        outline: none;
-        direction: rtl;
-        transition: border-color 0.2s;
-      }
-      .form-field input:focus,
-      .form-field select:focus {
-        border-color: var(--red);
-      }
-      .task-form-grid {
-        display: grid;
-        grid-template-columns: 160px 1fr auto;
-        gap: 8px;
-        align-items: end;
-      }
+/* Form Section */
+.form-section { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-md); padding: 1.125rem; margin-bottom: 1.25rem; }
+.form-section h3 { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: .875rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.form-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+.form-field input, .form-field select { width: 100%; background: var(--surface2); border: 0.5px solid var(--b2); border-radius: var(--radius-sm); padding: 8px 11px; font-size: 13px; color: var(--text); font-family: inherit; outline: none; direction: rtl; transition: border-color .2s; }
+.form-field input:focus, .form-field select:focus { border-color: var(--red); }
+.task-form-grid { display: grid; grid-template-columns: 160px 1fr auto; gap: 8px; align-items: end; }
 
-      /* Modal */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 100;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        backdrop-filter: blur(2px);
-      }
-      .modal-overlay.open {
-        display: flex;
-      }
-      .modal {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        width: 100%;
-        max-width: 380px;
-        animation: modalIn 0.2s ease;
-      }
-      @keyframes modalIn {
-        from {
-          opacity: 0;
-          transform: scale(0.96);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-      .modal h3 {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-      }
-      .modal p {
-        font-size: 13px;
-        color: var(--muted);
-        margin-bottom: 1.25rem;
-        line-height: 1.6;
-      }
-      .modal-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-      }
-      .modal input,
-      .modal textarea {
-        width: 100%;
-        background: var(--surface2);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-sm);
-        padding: 10px 12px;
-        font-size: 14px;
-        color: var(--text);
-        font-family: inherit;
-        outline: none;
-        direction: rtl;
-        transition: border-color 0.2s;
-        margin-bottom: 1rem;
-      }
-      .modal input:focus,
-      .modal textarea:focus {
-        border-color: var(--red);
-      }
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(2px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-lg); padding: 1.5rem; width: 100%; max-width: 380px; animation: modalIn .2s ease; }
+@keyframes modalIn { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
+.modal h3 { font-size: 16px; font-weight: 600; margin-bottom: .5rem; }
+.modal p { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal input, .modal textarea { width: 100%; background: var(--surface2); border: 0.5px solid var(--b2); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; color: var(--text); font-family: inherit; outline: none; direction: rtl; transition: border-color .2s; margin-bottom: 1rem; }
+.modal input:focus, .modal textarea:focus { border-color: var(--red); }
 
-      /* Toast */
-      .toast-container {
-        position: fixed;
-        bottom: 1.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 200;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        pointer-events: none;
-      }
-      .toast {
-        background: var(--surface);
-        border: 0.5px solid var(--b2);
-        border-radius: var(--radius-md);
-        padding: 11px 18px;
-        font-size: 13px;
-        white-space: nowrap;
-        opacity: 0;
-        transform: translateY(12px);
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      }
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .toast.success {
-        border-color: var(--green-br);
-        color: var(--green);
-      }
-      .toast.error {
-        border-color: var(--red-br);
-        color: var(--red-h);
-      }
-      .toast.info {
-        border-color: var(--b2);
-        color: var(--text);
-      }
+/* Toast */
+.toast-container { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--surface); border: 0.5px solid var(--b2); border-radius: var(--radius-md); padding: 11px 18px; font-size: 13px; white-space: nowrap; opacity: 0; transform: translateY(12px); transition: all .3s ease; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-color: var(--green-br); color: var(--green); }
+.toast.error   { border-color: var(--red-br);   color: var(--red-h); }
+.toast.info    { border-color: var(--b2);        color: var(--text); }
 
-      /* Spinner */
-      .spinner {
-        width: 15px;
-        height: 15px;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+/* Spinner */
+.spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-      /* Inline action buttons */
-      .action-btn {
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-family: inherit;
-        cursor: pointer;
-        border: 0.5px solid var(--b2);
-        background: transparent;
-        color: var(--muted);
-        transition: all 0.18s;
-      }
-      .action-btn:hover {
-        border-color: var(--red-br);
-        color: var(--red-h);
-      }
-      .action-btn.edit:hover {
-        border-color: var(--amber-br);
-        color: var(--amber);
-      }
+/* Inline action buttons */
+.action-btn { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-family: inherit; cursor: pointer; border: 0.5px solid var(--b2); background: transparent; color: var(--muted); transition: all .18s; }
+.action-btn:hover { border-color: var(--red-br); color: var(--red-h); }
+.action-btn.edit:hover { border-color: var(--amber-br); color: var(--amber); }
 
-      @media (max-width: 640px) {
-        .stats-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-        .form-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-        .task-form-grid {
-          grid-template-columns: 1fr;
-          grid-template-rows: auto auto auto;
-        }
-        .task-form-grid .btn {
-          width: 100%;
-        }
-        thead th:nth-child(4),
-        tbody td:nth-child(4) {
-          display: none;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Login -->
-    <div id="login-screen">
-      <div class="lbox">
-        <div class="brand">
-          <div class="brand-icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </div>
-          <h1>Kayan Store</h1>
-          <p>لوحة المدير</p>
-        </div>
-        <div class="lcard" id="login-card">
-          <h2>ادخل كلمة مرور المدير</h2>
-          <input
-            type="password"
-            id="pw-input"
-            placeholder="••••••••"
-            onkeydown="if (event.key === 'Enter') handleAdminLogin();"
-          />
-          <button
-            class="btn-login btn-red"
-            id="login-btn"
-            onclick="handleAdminLogin()"
-          >
-            دخول
-          </button>
-          <div class="lerr" id="login-error">كلمة المرور غلط</div>
-        </div>
-        <div class="lfoot"><a href="index.html">← رجوع لصفحة الموظفين</a></div>
+@media(max-width:640px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .task-form-grid{grid-template-columns:1fr; grid-template-rows:auto auto auto;}
+  .task-form-grid .btn{width:100%;}
+  thead th:nth-child(4),tbody td:nth-child(4){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
       </div>
+      <h1>Kayan Store</h1>
+      <p>لوحة المدير</p>
+    </div>
+    <div class="lcard" id="login-card">
+      <h2>ادخل كلمة مرور المدير</h2>
+      <input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleAdminLogin()">
+      <button class="btn-login btn-red" id="login-btn" onclick="handleAdminLogin()">دخول</button>
+      <div class="lerr" id="login-error">كلمة المرور غلط</div>
+    </div>
+    <div class="lfoot"><a href="index.html">← رجوع لصفحة الموظفين</a></div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+        </svg>
+      </div>
+      <h1>Kayan Store — لوحة المدير</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot"></div>
+      <span class="live-label">Live</span>
+      <button class="logout-btn" onclick="handleAdminLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('att')">الحضور</button>
+      <button class="tab" onclick="switchTab('ho')">تسليم الشيفت</button>
+      <button class="tab" onclick="switchTab('tasks')">التاسكات</button>
+      <button class="tab" onclick="switchTab('sellers')">الموظفين</button>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard">
-      <div class="topbar">
-        <div class="topbar-left">
-          <div class="topbar-logo">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-            </svg>
-          </div>
-          <h1>Kayan Store — لوحة المدير</h1>
-        </div>
-        <div class="topbar-right">
-          <div class="live-dot"></div>
-          <span class="live-label">Live</span>
-          <button class="logout-btn" onclick="handleAdminLogout()">خروج</button>
-        </div>
+    <!-- ATTENDANCE -->
+    <div class="tab-pane active" id="pane-att">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">حضور اليوم</div><div class="stat-value green" id="stat-present">—</div></div>
+        <div class="stat-card"><div class="stat-label">انصراف</div><div class="stat-value amber" id="stat-checkout">—</div></div>
+        <div class="stat-card"><div class="stat-label">غياب</div><div class="stat-value red" id="stat-absent">—</div></div>
       </div>
-
-      <div class="main">
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('att')">الحضور</button>
-          <button class="tab" onclick="switchTab('ho')">تسليم الشيفت</button>
-          <button class="tab" onclick="switchTab('tasks')">التاسكات</button>
-          <button class="tab" onclick="switchTab('sellers')">الموظفين</button>
-        </div>
-
-        <!-- ATTENDANCE -->
-        <div class="tab-pane active" id="pane-att">
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-label">حضور اليوم</div>
-              <div class="stat-value green" id="stat-present">—</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">انصراف</div>
-              <div class="stat-value amber" id="stat-checkout">—</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">غياب</div>
-              <div class="stat-value red" id="stat-absent">—</div>
-            </div>
-          </div>
-          <div class="controls">
-            <input type="date" id="att-date" />
-            <select id="att-filter">
-              <option value="">كل الحركات</option>
-              <option value="حضور">حضور</option>
-              <option value="انصراف">انصراف</option>
-              <option value="غياب">غياب</option>
-            </select>
-            <button class="ctrl-btn" onclick="loadAttendance()">↻ تحديث</button>
-            <button class="ctrl-btn red ml" onclick="exportAttendanceCSV()">
-              تصدير CSV
-            </button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>الموظف</th>
-                  <th>الكود</th>
-                  <th>الحالة</th>
-                  <th>الوقت</th>
-                  <th>ملاحظة</th>
-                </tr>
-              </thead>
-              <tbody id="att-tbody">
-                <tr>
-                  <td colspan="5" class="loading-state">جاري التحميل...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- HANDOVERS -->
-        <div class="tab-pane" id="pane-ho">
-          <div class="controls">
-            <input type="date" id="ho-date" />
-            <button class="ctrl-btn" onclick="loadHandovers()">↻ تحديث</button>
-          </div>
-          <div id="ho-content">
-            <div class="loading-state">جاري التحميل...</div>
-          </div>
-        </div>
-
-        <!-- TASKS -->
-        <div class="tab-pane" id="pane-tasks">
-          <div class="form-section">
-            <h3>إضافة تاسك لموظف</h3>
-            <div class="task-form-grid">
-              <div class="form-field">
-                <label>الموظف</label>
-                <select id="task-seller-select">
-                  <option value="">اختار موظف...</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label>التاسك</label>
-                <input
-                  type="text"
-                  id="task-input"
-                  placeholder="وصف التاسك..."
-                  onkeydown="if (event.key === 'Enter') addTask();"
-                />
-              </div>
-              <div
-                class="form-field"
-                style="display: flex; align-items: flex-end"
-              >
-                <button
-                  class="btn btn-red btn-full"
-                  onclick="addTask()"
-                  id="add-task-btn"
-                >
-                  + إضافة
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <input type="date" id="tasks-date" />
-            <select id="tasks-seller-filter">
-              <option value="">كل الموظفين</option>
-            </select>
-            <button class="ctrl-btn" onclick="loadTasks()">↻ تحديث</button>
-          </div>
-          <div class="summary-row" id="tasks-summary"></div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>الموظف</th>
-                  <th>الكود</th>
-                  <th>التاسك</th>
-                  <th>الحالة</th>
-                  <th>ملاحظة</th>
-                  <th>الوقت</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="tasks-tbody">
-                <tr>
-                  <td colspan="7" class="loading-state">جاري التحميل...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- SELLERS -->
-        <div class="tab-pane" id="pane-sellers">
-          <div class="form-section">
-            <h3>إضافة موظف جديد</h3>
-            <div class="form-grid">
-              <div class="form-field">
-                <label>الاسم</label
-                ><input type="text" id="new-name" placeholder="اسم الموظف" />
-              </div>
-              <div class="form-field">
-                <label>الكود</label
-                ><input
-                  type="text"
-                  id="new-code"
-                  placeholder="S-01"
-                  style="
-                    direction: ltr;
-                    text-align: center;
-                    letter-spacing: 1px;
-                  "
-                />
-              </div>
-              <div class="form-field">
-                <label>كلمة المرور</label
-                ><input type="text" id="new-pass" placeholder="كلمة المرور" />
-              </div>
-            </div>
-            <button
-              class="btn btn-red btn-full"
-              onclick="addSeller()"
-              id="add-seller-btn"
-            >
-              إضافة الموظف
-            </button>
-          </div>
-          <div class="sellers-grid" id="sellers-grid">
-            <div class="loading-state">جاري التحميل...</div>
-          </div>
-        </div>
+      <div class="controls">
+        <input type="date" id="att-date">
+        <select id="att-filter">
+          <option value="">كل الحركات</option>
+          <option value="حضور">حضور</option>
+          <option value="انصراف">انصراف</option>
+          <option value="غياب">غياب</option>
+        </select>
+        <button class="ctrl-btn" onclick="loadAttendance()">↻ تحديث</button>
+        <button class="ctrl-btn red ml" onclick="exportAttendanceCSV()">تصدير CSV</button>
       </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الموظف</th><th>الكود</th><th>الحالة</th><th>الوقت</th><th>ملاحظة</th></tr></thead>
+        <tbody id="att-tbody"><tr><td colspan="5" class="loading-state">جاري التحميل...</td></tr></tbody>
+      </table></div>
     </div>
 
-    <!-- Confirm Modal -->
-    <div class="modal-overlay" id="confirm-modal">
-      <div class="modal">
-        <h3 id="modal-title">تأكيد</h3>
-        <p id="modal-message"></p>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-          <button class="btn btn-red" id="modal-confirm-btn">تأكيد</button>
-        </div>
+    <!-- HANDOVERS -->
+    <div class="tab-pane" id="pane-ho">
+      <div class="controls">
+        <input type="date" id="ho-date">
+        <button class="ctrl-btn" onclick="loadHandovers()">↻ تحديث</button>
       </div>
+      <div id="ho-content"><div class="loading-state">جاري التحميل...</div></div>
     </div>
 
-    <!-- Edit Task Modal -->
-    <div class="modal-overlay" id="edit-task-modal">
-      <div class="modal">
-        <h3>تعديل التاسك</h3>
-        <input type="text" id="edit-task-input" placeholder="وصف التاسك..." />
-        <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closeEditModal()">
-            إلغاء
-          </button>
-          <button class="btn btn-red" id="edit-task-confirm-btn">
-            حفظ التعديل
-          </button>
+    <!-- TASKS -->
+    <div class="tab-pane" id="pane-tasks">
+      <div class="form-section">
+        <h3>إضافة تاسك لموظف</h3>
+        <div class="task-form-grid">
+          <div class="form-field">
+            <label>الموظف</label>
+            <select id="task-seller-select"><option value="">اختار موظف...</option></select>
+          </div>
+          <div class="form-field">
+            <label>التاسك</label>
+            <input type="text" id="task-input" placeholder="وصف التاسك..." onkeydown="if(event.key==='Enter')addTask()">
+          </div>
+          <div class="form-field" style="display:flex;align-items:flex-end;">
+            <button class="btn btn-red btn-full" onclick="addTask()" id="add-task-btn">+ إضافة</button>
+          </div>
         </div>
       </div>
+      <div class="controls">
+        <input type="date" id="tasks-date">
+        <select id="tasks-seller-filter"><option value="">كل الموظفين</option></select>
+        <button class="ctrl-btn" onclick="loadTasks()">↻ تحديث</button>
+      </div>
+      <div class="summary-row" id="tasks-summary"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>الموظف</th><th>الكود</th><th>التاسك</th><th>الحالة</th><th>ملاحظة</th><th>الوقت</th><th></th></tr></thead>
+        <tbody id="tasks-tbody"><tr><td colspan="7" class="loading-state">جاري التحميل...</td></tr></tbody>
+      </table></div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toast-container"></div>
+    <!-- SELLERS -->
+    <div class="tab-pane" id="pane-sellers">
+      <div class="form-section">
+        <h3>إضافة موظف جديد</h3>
+        <div class="form-grid">
+          <div class="form-field"><label>الاسم</label><input type="text" id="new-name" placeholder="اسم الموظف"></div>
+          <div class="form-field"><label>الكود</label><input type="text" id="new-code" placeholder="S-01" style="direction:ltr;text-align:center;letter-spacing:1px;"></div>
+          <div class="form-field"><label>كلمة المرور</label><input type="text" id="new-pass" placeholder="كلمة المرور"></div>
+        </div>
+        <button class="btn btn-red btn-full" onclick="addSeller()" id="add-seller-btn">إضافة الموظف</button>
+      </div>
+      <div class="sellers-grid" id="sellers-grid"><div class="loading-state">جاري التحميل...</div></div>
+    </div>
+  </div>
+</div>
 
-    <script>
-      // ── Guard ──
-      if (!window.CONFIG || CONFIG.supabaseUrl === "YOUR_SUPABASE_URL") {
-        document.body.innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:40px">⚠️</div><div style="font-size:16px">افتح config.js وأضف بيانات Supabase</div></div>';
-      }
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="modal-title">تأكيد</h3>
+    <p id="modal-message"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-red" id="modal-confirm-btn">تأكيد</button>
+    </div>
+  </div>
+</div>
 
-      // ── Supabase ──
-      const { createClient } = supabase;
-      const db = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+<!-- Edit Task Modal -->
+<div class="modal-overlay" id="edit-task-modal">
+  <div class="modal">
+    <h3>تعديل التاسك</h3>
+    <input type="text" id="edit-task-input" placeholder="وصف التاسك...">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEditModal()">إلغاء</button>
+      <button class="btn btn-red" id="edit-task-confirm-btn">حفظ التعديل</button>
+    </div>
+  </div>
+</div>
 
-      // ── State ──
-      let sellers = [];
-      let attRecords = [];
-      const avatarClasses = ["av-0", "av-1", "av-2", "av-3"];
-      const avatarMap = {};
-      let avatarCounter = 0;
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
 
-      // ── Utils ──
-      function pad(n) {
-        return String(n).padStart(2, "0");
-      }
-      function fmtTime(ts) {
-        const d = new Date(ts);
-        return pad(d.getHours()) + ":" + pad(d.getMinutes());
-      }
-      function todayISO() {
-        return new Date().toISOString().split("T")[0];
-      }
-      function getAvatar(key) {
-        if (!avatarMap[key])
-          avatarMap[key] = avatarClasses[avatarCounter++ % 4];
-        return avatarMap[key];
-      }
-      function getInitials(name) {
-        return name
-          ? name
-              .trim()
-              .split(/\s+/)
-              .slice(0, 2)
-              .map((w) => w[0])
-              .join("")
-          : "?";
-      }
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
+<script>
+// ── Guard ──
+if (!window.CONFIG || CONFIG.supabaseUrl === 'YOUR_SUPABASE_URL') {
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background:#0a0a0a;color:#ef5350;text-align:center;flex-direction:column;gap:1rem;padding:2rem"><div style="font-size:40px">⚠️</div><div style="font-size:16px">افتح admin.html وأضف بيانات Supabase في أول الكود</div></div>';
+}
 
-      // ── Toast ──
-      function showToast(message, type = "info", duration = 3500) {
-        const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = "toast " + type;
-        toast.textContent = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add("show"));
-        setTimeout(() => {
-          toast.classList.remove("show");
-          setTimeout(() => toast.remove(), 300);
-        }, duration);
-      }
+// ── Supabase ──
+const { createClient } = supabase;
+const db = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
 
-      // ── Modal ──
-      let pendingConfirmAction = null;
-      function showConfirm(title, message, onConfirm) {
-        document.getElementById("modal-title").textContent = title;
-        document.getElementById("modal-message").textContent = message;
-        pendingConfirmAction = onConfirm;
-        document.getElementById("confirm-modal").classList.add("open");
-      }
-      function closeModal() {
-        document.getElementById("confirm-modal").classList.remove("open");
-        pendingConfirmAction = null;
-      }
-      document.getElementById("modal-confirm-btn").onclick = () => {
-        if (pendingConfirmAction) pendingConfirmAction();
-        closeModal();
-      };
+// ── State ──
+let sellers = [];
+let attRecords = [];
+const avatarClasses = ['av-0','av-1','av-2','av-3'];
+const avatarMap = {};
+let avatarCounter = 0;
 
-      let pendingEditTaskId = null;
-      function showEditTask(taskId, currentText) {
-        pendingEditTaskId = taskId;
-        document.getElementById("edit-task-input").value = currentText;
-        document.getElementById("edit-task-modal").classList.add("open");
-        setTimeout(
-          () => document.getElementById("edit-task-input").focus(),
-          100,
-        );
-      }
-      function closeEditModal() {
-        document.getElementById("edit-task-modal").classList.remove("open");
-        pendingEditTaskId = null;
-      }
-      document.getElementById("edit-task-confirm-btn").onclick = saveEditedTask;
+// ── Utils ──
+function pad(n) { return String(n).padStart(2,'0'); }
+function fmtTime(ts) { const d = new Date(ts); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+function getAvatar(key) {
+  if (!avatarMap[key]) avatarMap[key] = avatarClasses[avatarCounter++ % 4];
+  return avatarMap[key];
+}
+function getInitials(name) { return name ? name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('') : '?'; }
+function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-      // ── Admin Auth ──
-      function handleAdminLogin() {
-        const val = document.getElementById("pw-input").value;
-        const errorEl = document.getElementById("login-error");
-        errorEl.style.display = "none";
-        if (val === CONFIG.adminPassword) {
-          sessionStorage.setItem("kayan_admin", "1");
-          document.getElementById("login-screen").style.display = "none";
-          document.getElementById("dashboard").style.display = "block";
-          bootDashboard();
-        } else {
-          const card = document.getElementById("login-card");
-          card.classList.remove("shake");
-          void card.offsetWidth;
-          card.classList.add("shake");
-          errorEl.style.display = "block";
-          document.getElementById("pw-input").value = "";
-        }
-      }
-      function handleAdminLogout() {
-        sessionStorage.removeItem("kayan_admin");
-        document.getElementById("dashboard").style.display = "none";
-        document.getElementById("login-screen").style.display = "flex";
-        document.getElementById("pw-input").value = "";
-      }
-      document.getElementById("pw-input").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") handleAdminLogin();
-      });
+// ── Toast ──
+function showToast(message, type = 'info', duration = 3500) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, duration);
+}
 
-      window.addEventListener("load", () => {
-        if (sessionStorage.getItem("kayan_admin") === "1") {
-          document.getElementById("login-screen").style.display = "none";
-          document.getElementById("dashboard").style.display = "block";
-          bootDashboard();
-        }
-      });
+// ── Modal ──
+let pendingConfirmAction = null;
+function showConfirm(title, message, onConfirm) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-message').textContent = message;
+  pendingConfirmAction = onConfirm;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  pendingConfirmAction = null;
+}
+document.getElementById('modal-confirm-btn').onclick = () => {
+  if (pendingConfirmAction) pendingConfirmAction();
+  closeModal();
+};
 
-      // ── Boot ──
-      function bootDashboard() {
-        document.getElementById("att-date").value = todayISO();
-        document.getElementById("ho-date").value = todayISO();
-        document.getElementById("tasks-date").value = todayISO();
-        document
-          .getElementById("att-date")
-          .addEventListener("change", loadAttendance);
-        document
-          .getElementById("att-filter")
-          .addEventListener("change", loadAttendance);
-        document
-          .getElementById("ho-date")
-          .addEventListener("change", loadHandovers);
-        document
-          .getElementById("tasks-date")
-          .addEventListener("change", loadTasks);
-        document
-          .getElementById("tasks-seller-filter")
-          .addEventListener("change", loadTasks);
-        // Real-time
-        db.channel("adm-att")
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "attendance" },
-            loadAttendance,
-          )
-          .subscribe();
-        db.channel("adm-ho")
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "shift_handovers" },
-            () => {
-              if (
-                document.getElementById("pane-ho").classList.contains("active")
-              )
-                loadHandovers();
-            },
-          )
-          .subscribe();
-        db.channel("adm-tasks")
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "tasks" },
-            () => {
-              if (
-                document
-                  .getElementById("pane-tasks")
-                  .classList.contains("active")
-              )
-                loadTasks();
-            },
-          )
-          .subscribe();
-        loadSellersData();
-        loadAttendance();
-      }
+let pendingEditTaskId = null;
+function showEditTask(taskId, currentText) {
+  pendingEditTaskId = taskId;
+  document.getElementById('edit-task-input').value = currentText;
+  document.getElementById('edit-task-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-task-input').focus(), 100);
+}
+function closeEditModal() {
+  document.getElementById('edit-task-modal').classList.remove('open');
+  pendingEditTaskId = null;
+}
+document.getElementById('edit-task-confirm-btn').onclick = saveEditedTask;
 
-      // ── Tabs ──
-      const TAB_NAMES = ["att", "ho", "tasks", "sellers"];
-      function switchTab(name) {
-        document
-          .querySelectorAll(".tab")
-          .forEach((tab, i) =>
-            tab.classList.toggle("active", TAB_NAMES[i] === name),
-          );
-        document
-          .querySelectorAll(".tab-pane")
-          .forEach((pane) => pane.classList.remove("active"));
-        document.getElementById("pane-" + name).classList.add("active");
-        const actions = {
-          att: loadAttendance,
-          ho: loadHandovers,
-          tasks: loadTasks,
-          sellers: loadSellersUI,
-        };
-        if (actions[name]) actions[name]();
-      }
+// ── Admin Auth ──
+function handleAdminLogin() {
+  const val = document.getElementById('pw-input').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.style.display = 'none';
+  if (val === CONFIG.adminPassword) {
+    sessionStorage.setItem('kayan_admin','1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    bootDashboard();
+  } else {
+    const card = document.getElementById('login-card');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    errorEl.style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+function handleAdminLogout() {
+  sessionStorage.removeItem('kayan_admin');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') handleAdminLogin(); });
 
-      // ── Sellers ──
-      async function loadSellersData() {
-        const { data } = await db.from("sellers").select("*").order("code");
-        if (!data) return;
-        sellers = data;
-        const options = data
-          .map(
-            (s) => `<option value="${s.code}">${s.name} (${s.code})</option>`,
-          )
-          .join("");
-        document.getElementById("task-seller-select").innerHTML =
-          '<option value="">اختار موظف...</option>' + options;
-        document.getElementById("tasks-seller-filter").innerHTML =
-          '<option value="">كل الموظفين</option>' + options;
-      }
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('kayan_admin') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    bootDashboard();
+  }
+});
 
-      async function loadSellersUI() {
-        const { data, error } = await db
-          .from("sellers")
-          .select("*")
-          .order("code");
-        const grid = document.getElementById("sellers-grid");
-        if (error || !data || !data.length) {
-          grid.innerHTML =
-            '<div class="empty-state">ما فيش موظفين مضافين بعد</div>';
-          return;
-        }
-        sellers = data;
-        grid.innerHTML = data
-          .map(
-            (s) => `
+// ── Boot ──
+function bootDashboard() {
+  document.getElementById('att-date').value   = todayISO();
+  document.getElementById('ho-date').value    = todayISO();
+  document.getElementById('tasks-date').value = todayISO();
+  document.getElementById('att-date').addEventListener('change', loadAttendance);
+  document.getElementById('att-filter').addEventListener('change', loadAttendance);
+  document.getElementById('ho-date').addEventListener('change', loadHandovers);
+  document.getElementById('tasks-date').addEventListener('change', loadTasks);
+  document.getElementById('tasks-seller-filter').addEventListener('change', loadTasks);
+  // Real-time
+  db.channel('adm-att').on('postgres_changes', {event:'*', schema:'public', table:'attendance'}, loadAttendance).subscribe();
+  db.channel('adm-ho').on('postgres_changes', {event:'*', schema:'public', table:'shift_handovers'}, () => {
+    if (document.getElementById('pane-ho').classList.contains('active')) loadHandovers();
+  }).subscribe();
+  db.channel('adm-tasks').on('postgres_changes', {event:'*', schema:'public', table:'tasks'}, () => {
+    if (document.getElementById('pane-tasks').classList.contains('active')) loadTasks();
+  }).subscribe();
+  loadSellersData();
+  loadAttendance();
+}
+
+// ── Tabs ──
+const TAB_NAMES = ['att','ho','tasks','sellers'];
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((tab, i) => tab.classList.toggle('active', TAB_NAMES[i] === name));
+  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  const actions = { att: loadAttendance, ho: loadHandovers, tasks: loadTasks, sellers: loadSellersUI };
+  if (actions[name]) actions[name]();
+}
+
+// ── Sellers ──
+async function loadSellersData() {
+  const { data } = await db.from('sellers').select('*').order('code');
+  if (!data) return;
+  sellers = data;
+  const options = data.map(s => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('');
+  document.getElementById('task-seller-select').innerHTML = '<option value="">اختار موظف...</option>' + options;
+  document.getElementById('tasks-seller-filter').innerHTML = '<option value="">كل الموظفين</option>' + options;
+}
+
+async function loadSellersUI() {
+  const { data, error } = await db.from('sellers').select('*').order('code');
+  const grid = document.getElementById('sellers-grid');
+  if (error || !data || !data.length) { grid.innerHTML = '<div class="empty-state">ما فيش موظفين مضافين بعد</div>'; return; }
+  sellers = data;
+  grid.innerHTML = data.map(s => `
     <div class="seller-card">
       <div class="seller-card-top">
         <div class="avatar ${getAvatar(s.code)}">${getInitials(s.name)}</div>
@@ -1344,299 +525,194 @@
       <div style="margin-top:.75rem;">
         <button class="action-btn" onclick="confirmDeleteSeller('${s.id}','${escapeHtml(s.name)}')">حذف</button>
       </div>
-    </div>`,
-          )
-          .join("");
-      }
+    </div>`).join('');
+}
 
-      async function addSeller() {
-        const name = document.getElementById("new-name").value.trim();
-        const code = document
-          .getElementById("new-code")
-          .value.trim()
-          .toUpperCase();
-        const pass = document.getElementById("new-pass").value.trim();
-        if (!name || !code || !pass) {
-          showToast("من فضلك ادخل الاسم والكود وكلمة المرور", "error");
-          return;
-        }
+async function addSeller() {
+  const name = document.getElementById('new-name').value.trim();
+  const code = document.getElementById('new-code').value.trim().toUpperCase();
+  const pass = document.getElementById('new-pass').value.trim();
+  if (!name || !code || !pass) { showToast('من فضلك ادخل الاسم والكود وكلمة المرور', 'error'); return; }
 
-        const btn = document.getElementById("add-seller-btn");
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner"></div>';
+  const btn = document.getElementById('add-seller-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>';
 
-        const { error } = await db
-          .from("sellers")
-          .insert({ name, code, password: pass });
-        btn.disabled = false;
-        btn.textContent = "إضافة الموظف";
+  const { error } = await db.from('sellers').insert({ name, code, password: pass });
+  btn.disabled = false; btn.textContent = 'إضافة الموظف';
 
-        if (error) {
-          showToast(
-            error.message.includes("unique")
-              ? "الكود ده موجود بالفعل"
-              : "حصل خطأ: " + error.message,
-            "error",
-          );
-          return;
-        }
-        showToast("تم إضافة " + name + " بنجاح ✓", "success");
-        document.getElementById("new-name").value = "";
-        document.getElementById("new-code").value = "";
-        document.getElementById("new-pass").value = "";
-        loadSellersUI();
-        loadSellersData();
-      }
+  if (error) {
+    showToast(error.message.includes('unique') ? 'الكود ده موجود بالفعل' : 'حصل خطأ: ' + error.message, 'error');
+    return;
+  }
+  showToast('تم إضافة ' + name + ' بنجاح ✓', 'success');
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-code').value = '';
+  document.getElementById('new-pass').value = '';
+  loadSellersUI(); loadSellersData();
+}
 
-      function confirmDeleteSeller(id, name) {
-        showConfirm(
-          "حذف موظف",
-          "هتحذف " + name + "؟ مش هترجع هي ولا بياناته!",
-          () => deleteSeller(id, name),
-        );
-      }
-      async function deleteSeller(id, name) {
-        const { error } = await db.from("sellers").delete().eq("id", id);
-        if (error) {
-          showToast("حصل خطأ أثناء الحذف", "error");
-          return;
-        }
-        showToast("تم حذف " + name, "info");
-        loadSellersUI();
-        loadSellersData();
-      }
+function confirmDeleteSeller(id, name) {
+  showConfirm('حذف موظف', 'هتحذف ' + name + '؟ مش هترجع هي ولا بياناته!', () => deleteSeller(id, name));
+}
+async function deleteSeller(id, name) {
+  const { error } = await db.from('sellers').delete().eq('id', id);
+  if (error) { showToast('حصل خطأ أثناء الحذف', 'error'); return; }
+  showToast('تم حذف ' + name, 'info');
+  loadSellersUI(); loadSellersData();
+}
 
-      // ── Attendance ──
-      async function loadAttendance() {
-        const date = document.getElementById("att-date").value;
-        const filter = document.getElementById("att-filter").value;
-        document.getElementById("att-tbody").innerHTML =
-          '<tr><td colspan="5" class="loading-state">جاري التحميل...</td></tr>';
+// ── Attendance ──
+async function loadAttendance() {
+  const date   = document.getElementById('att-date').value;
+  const filter = document.getElementById('att-filter').value;
+  document.getElementById('att-tbody').innerHTML = '<tr><td colspan="5" class="loading-state">جاري التحميل...</td></tr>';
 
-        let query = db
-          .from("attendance")
-          .select("*")
-          .eq("date", date)
-          .order("recorded_at", { ascending: false });
-        if (filter) query = query.eq("action", filter);
-        const { data, error } = await query;
+  let query = db.from('attendance').select('*').eq('date', date).order('recorded_at', { ascending: false });
+  if (filter) query = query.eq('action', filter);
+  const { data, error } = await query;
 
-        if (error) {
-          document.getElementById("att-tbody").innerHTML =
-            '<tr><td colspan="5" class="empty-state">حصل خطأ في التحميل</td></tr>';
-          return;
-        }
-        attRecords = data || [];
+  if (error) { document.getElementById('att-tbody').innerHTML = '<tr><td colspan="5" class="empty-state">حصل خطأ في التحميل</td></tr>'; return; }
+  attRecords = data || [];
 
-        document.getElementById("stat-present").textContent = attRecords.filter(
-          (r) => r.action === "حضور",
-        ).length;
-        document.getElementById("stat-checkout").textContent =
-          attRecords.filter((r) => r.action === "انصراف").length;
-        document.getElementById("stat-absent").textContent = attRecords.filter(
-          (r) => r.action === "غياب",
-        ).length;
+  document.getElementById('stat-present').textContent  = attRecords.filter(r=>r.action==='حضور').length;
+  document.getElementById('stat-checkout').textContent = attRecords.filter(r=>r.action==='انصراف').length;
+  document.getElementById('stat-absent').textContent   = attRecords.filter(r=>r.action==='غياب').length;
 
-        if (!attRecords.length) {
-          document.getElementById("att-tbody").innerHTML =
-            '<tr><td colspan="5" class="empty-state">لا يوجد سجلات لهذا اليوم</td></tr>';
-          return;
-        }
+  if (!attRecords.length) { document.getElementById('att-tbody').innerHTML = '<tr><td colspan="5" class="empty-state">لا يوجد سجلات لهذا اليوم</td></tr>'; return; }
 
-        document.getElementById("att-tbody").innerHTML = attRecords
-          .map((record) => {
-            const badgeClass =
-              record.action === "حضور"
-                ? "badge-green"
-                : record.action === "انصراف"
-                  ? "badge-amber"
-                  : "badge-red";
-            return `<tr>
+  document.getElementById('att-tbody').innerHTML = attRecords.map(record => {
+    const badgeClass = record.action === 'حضور' ? 'badge-green' : record.action === 'انصراف' ? 'badge-amber' : 'badge-red';
+    return `<tr>
       <td><div class="emp-cell"><div class="avatar ${getAvatar(record.seller_code || record.employee_name)}">${getInitials(record.employee_name)}</div><span>${escapeHtml(record.employee_name)}</span></div></td>
-      <td><span class="code-chip">${record.seller_code || "—"}</span></td>
+      <td><span class="code-chip">${record.seller_code || '—'}</span></td>
       <td><span class="badge ${badgeClass}">${record.action}</span></td>
       <td><span class="time-chip">${fmtTime(record.recorded_at)}</span></td>
-      <td>${record.note ? `<span class="note-text">${escapeHtml(record.note)}</span>` : "—"}</td>
+      <td>${record.note ? `<span class="note-text">${escapeHtml(record.note)}</span>` : '—'}</td>
     </tr>`;
-          })
-          .join("");
-      }
+  }).join('');
+}
 
-      function exportAttendanceCSV() {
-        if (!attRecords.length) {
-          showToast("لا يوجد بيانات للتصدير", "error");
-          return;
-        }
-        const header = "الاسم,الكود,الحالة,الوقت,التاريخ,ملاحظة";
-        const rows = attRecords
-          .map(
-            (r) =>
-              `"${r.employee_name}","${r.seller_code || ""}","${r.action}","${fmtTime(r.recorded_at)}","${r.date}","${r.note || ""}"`,
-          )
-          .join("\n");
-        const blob = new Blob(["\uFEFF" + header + "\n" + rows], {
-          type: "text/csv;charset=utf-8",
-        });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `attendance_${document.getElementById("att-date").value}.csv`;
-        a.click();
-      }
+function exportAttendanceCSV() {
+  if (!attRecords.length) { showToast('لا يوجد بيانات للتصدير', 'error'); return; }
+  const header = 'الاسم,الكود,الحالة,الوقت,التاريخ,ملاحظة';
+  const rows = attRecords.map(r =>
+    `"${r.employee_name}","${r.seller_code||''}","${r.action}","${fmtTime(r.recorded_at)}","${r.date}","${r.note||''}"`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + header + '\n' + rows], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `attendance_${document.getElementById('att-date').value}.csv`;
+  a.click();
+}
 
-      // ── Handovers ──
-      async function loadHandovers() {
-        const date = document.getElementById("ho-date").value;
-        const content = document.getElementById("ho-content");
-        content.innerHTML = '<div class="loading-state">جاري التحميل...</div>';
-        const { data, error } = await db
-          .from("shift_handovers")
-          .select("*")
-          .eq("date", date)
-          .order("recorded_at", { ascending: false });
-        if (error || !data || !data.length) {
-          content.innerHTML =
-            '<div class="empty-state">لا يوجد تسليمات لهذا اليوم</div>';
-          return;
-        }
-        content.innerHTML = `<div class="table-wrap"><table>
+// ── Handovers ──
+async function loadHandovers() {
+  const date = document.getElementById('ho-date').value;
+  const content = document.getElementById('ho-content');
+  content.innerHTML = '<div class="loading-state">جاري التحميل...</div>';
+  const { data, error } = await db.from('shift_handovers').select('*').eq('date', date).order('recorded_at', { ascending: false });
+  if (error || !data || !data.length) { content.innerHTML = '<div class="empty-state">لا يوجد تسليمات لهذا اليوم</div>'; return; }
+  content.innerHTML = `<div class="table-wrap"><table>
     <thead><tr><th>الموظف</th><th>الكود</th><th>الحالة</th><th>الوقت</th><th>ملاحظة</th></tr></thead>
-    <tbody>${data
-      .map((r) => {
-        const isOk = r.status === "ok";
-        return `<tr>
-        <td><div class="emp-cell"><div class="avatar ${getAvatar(r.seller_code || r.employee_name)}">${getInitials(r.employee_name)}</div><span>${escapeHtml(r.employee_name)}</span></div></td>
-        <td><span class="code-chip">${r.seller_code || "—"}</span></td>
-        <td><span class="badge ${isOk ? "badge-green" : "badge-red"}">${isOk ? "تمام" : "مش تمام"}</span></td>
+    <tbody>${data.map(r => {
+      const isOk = r.status === 'ok';
+      return `<tr>
+        <td><div class="emp-cell"><div class="avatar ${getAvatar(r.seller_code||r.employee_name)}">${getInitials(r.employee_name)}</div><span>${escapeHtml(r.employee_name)}</span></div></td>
+        <td><span class="code-chip">${r.seller_code || '—'}</span></td>
+        <td><span class="badge ${isOk ? 'badge-green' : 'badge-red'}">${isOk ? 'تمام' : 'مش تمام'}</span></td>
         <td><span class="time-chip">${fmtTime(r.recorded_at)}</span></td>
-        <td>${r.note ? `<span class="note-text">${escapeHtml(r.note)}</span>` : "—"}</td>
+        <td>${r.note ? `<span class="note-text">${escapeHtml(r.note)}</span>` : '—'}</td>
       </tr>`;
-      })
-      .join("")}</tbody>
+    }).join('')}</tbody>
   </table></div>`;
-      }
+}
 
-      // ── Tasks ──
-      async function addTask() {
-        const code = document.getElementById("task-seller-select").value;
-        const text = document.getElementById("task-input").value.trim();
-        if (!code) {
-          showToast("اختار الموظف الأول", "error");
-          return;
-        }
-        if (!text) {
-          showToast("اكتب التاسك الأول", "error");
-          return;
-        }
+// ── Tasks ──
+async function addTask() {
+  const code = document.getElementById('task-seller-select').value;
+  const text = document.getElementById('task-input').value.trim();
+  if (!code) { showToast('اختار الموظف الأول', 'error'); return; }
+  if (!text) { showToast('اكتب التاسك الأول', 'error'); return; }
 
-        const btn = document.getElementById("add-task-btn");
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner"></div>';
+  const btn = document.getElementById('add-task-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>';
 
-        const seller = sellers.find((s) => s.code === code);
-        const { error } = await db.from("tasks").insert({
-          seller_code: code,
-          employee_name: seller ? seller.name : code,
-          task_text: text,
-          status: "pending",
-        });
+  const seller = sellers.find(s => s.code === code);
+  const { error } = await db.from('tasks').insert({
+    seller_code:   code,
+    employee_name: seller ? seller.name : code,
+    task_text:     text,
+    status:        'pending',
+  });
 
-        btn.disabled = false;
-        btn.textContent = "+ إضافة";
-        if (error) {
-          showToast("حصل خطأ: " + error.message, "error");
-          return;
-        }
-        showToast("تم إضافة التاسك ✓", "success");
-        document.getElementById("task-input").value = "";
-        loadTasks();
-      }
+  btn.disabled = false; btn.textContent = '+ إضافة';
+  if (error) { showToast('حصل خطأ: ' + error.message, 'error'); return; }
+  showToast('تم إضافة التاسك ✓', 'success');
+  document.getElementById('task-input').value = '';
+  loadTasks();
+}
 
-      async function loadTasks() {
-        const date = document.getElementById("tasks-date").value;
-        const filter = document.getElementById("tasks-seller-filter").value;
-        document.getElementById("tasks-tbody").innerHTML =
-          '<tr><td colspan="7" class="loading-state">جاري التحميل...</td></tr>';
-        document.getElementById("tasks-summary").innerHTML = "";
+async function loadTasks() {
+  const date   = document.getElementById('tasks-date').value;
+  const filter = document.getElementById('tasks-seller-filter').value;
+  document.getElementById('tasks-tbody').innerHTML = '<tr><td colspan="7" class="loading-state">جاري التحميل...</td></tr>';
+  document.getElementById('tasks-summary').innerHTML = '';
 
-        let query = db
-          .from("tasks")
-          .select("*")
-          .eq("date", date)
-          .order("seller_code")
-          .order("recorded_at");
-        if (filter) query = query.eq("seller_code", filter);
-        const { data, error } = await query;
+  let query = db.from('tasks').select('*').eq('date', date).order('seller_code').order('recorded_at');
+  if (filter) query = query.eq('seller_code', filter);
+  const { data, error } = await query;
 
-        if (error || !data || !data.length) {
-          document.getElementById("tasks-tbody").innerHTML =
-            '<tr><td colspan="7" class="empty-state">لا يوجد تاسكات لهذا اليوم</td></tr>';
-          return;
-        }
+  if (error || !data || !data.length) {
+    document.getElementById('tasks-tbody').innerHTML = '<tr><td colspan="7" class="empty-state">لا يوجد تاسكات لهذا اليوم</td></tr>';
+    return;
+  }
 
-        const doneCount = data.filter((t) => t.status === "done").length;
-        const pendingCount = data.length - doneCount;
-        document.getElementById("tasks-summary").innerHTML = `
+  const doneCount    = data.filter(t => t.status === 'done').length;
+  const pendingCount = data.length - doneCount;
+  document.getElementById('tasks-summary').innerHTML = `
     <span class="badge badge-green">خلصت: ${doneCount}</span>
     <span class="badge badge-amber">باقي: ${pendingCount}</span>
     <span class="badge badge-muted">الإجمالي: ${data.length}</span>`;
 
-        document.getElementById("tasks-tbody").innerHTML = data
-          .map((task) => {
-            const isDone = task.status === "done";
-            return `<tr>
+  document.getElementById('tasks-tbody').innerHTML = data.map(task => {
+    const isDone = task.status === 'done';
+    return `<tr>
       <td><div class="emp-cell"><div class="avatar ${getAvatar(task.seller_code)}">${getInitials(task.employee_name)}</div><span>${escapeHtml(task.employee_name)}</span></div></td>
       <td><span class="code-chip">${task.seller_code}</span></td>
-      <td style="${isDone ? "text-decoration:line-through;color:var(--muted)" : "font-weight:500"}">${escapeHtml(task.task_text)}</td>
-      <td><span class="badge ${isDone ? "badge-green" : "badge-amber"}">${isDone ? "✓ خلصت" : "قيد التنفيذ"}</span></td>
-      <td>${task.note ? `<span class="note-text" style="color:var(--red-h)">${escapeHtml(task.note)}</span>` : "—"}</td>
+      <td style="${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'font-weight:500'}">${escapeHtml(task.task_text)}</td>
+      <td><span class="badge ${isDone ? 'badge-green' : 'badge-amber'}">${isDone ? '✓ خلصت' : 'قيد التنفيذ'}</span></td>
+      <td>${task.note ? `<span class="note-text" style="color:var(--red-h)">${escapeHtml(task.note)}</span>` : '—'}</td>
       <td><span class="time-chip">${fmtTime(task.recorded_at)}</span></td>
       <td style="white-space:nowrap;">
         <button class="action-btn edit" onclick="showEditTask('${task.id}','${escapeHtml(task.task_text)}')">تعديل</button>
         <button class="action-btn" style="margin-right:4px;" onclick="confirmDeleteTask('${task.id}','${escapeHtml(task.task_text)}')">حذف</button>
       </td>
     </tr>`;
-          })
-          .join("");
-      }
+  }).join('');
+}
 
-      function confirmDeleteTask(taskId, taskText) {
-        showConfirm("حذف التاسك", 'هتحذف: "' + taskText + '"؟', () =>
-          deleteTask(taskId),
-        );
-      }
-      async function deleteTask(taskId) {
-        const { error } = await db.from("tasks").delete().eq("id", taskId);
-        if (error) {
-          showToast("حصل خطأ أثناء الحذف", "error");
-          return;
-        }
-        showToast("تم حذف التاسك", "info");
-        loadTasks();
-      }
+function confirmDeleteTask(taskId, taskText) {
+  showConfirm('حذف التاسك', 'هتحذف: "' + taskText + '"؟', () => deleteTask(taskId));
+}
+async function deleteTask(taskId) {
+  const { error } = await db.from('tasks').delete().eq('id', taskId);
+  if (error) { showToast('حصل خطأ أثناء الحذف', 'error'); return; }
+  showToast('تم حذف التاسك', 'info');
+  loadTasks();
+}
 
-      async function saveEditedTask() {
-        const newText = document.getElementById("edit-task-input").value.trim();
-        if (!newText) {
-          showToast("اكتب التاسك الأول", "error");
-          return;
-        }
-        const btn = document.getElementById("edit-task-confirm-btn");
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner"></div>';
-        const { error } = await db
-          .from("tasks")
-          .update({ task_text: newText })
-          .eq("id", pendingEditTaskId);
-        btn.disabled = false;
-        btn.textContent = "حفظ التعديل";
-        if (error) {
-          showToast("حصل خطأ أثناء التعديل", "error");
-          return;
-        }
-        showToast("تم حفظ التعديل ✓", "success");
-        closeEditModal();
-        loadTasks();
-      }
-    </script>
-  </body>
+async function saveEditedTask() {
+  const newText = document.getElementById('edit-task-input').value.trim();
+  if (!newText) { showToast('اكتب التاسك الأول', 'error'); return; }
+  const btn = document.getElementById('edit-task-confirm-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>';
+  const { error } = await db.from('tasks').update({ task_text: newText }).eq('id', pendingEditTaskId);
+  btn.disabled = false; btn.textContent = 'حفظ التعديل';
+  if (error) { showToast('حصل خطأ أثناء التعديل', 'error'); return; }
+  showToast('تم حفظ التعديل ✓', 'success');
+  closeEditModal();
+  loadTasks();
+}
+</script>
+</body>
 </html>
